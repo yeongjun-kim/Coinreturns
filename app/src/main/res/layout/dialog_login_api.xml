@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="av"
+            type="com.yj.coinreturns.view.LoginActivity" />
+
+        <variable
+            name="lvm"
+            type="com.yj.coinreturns.viewModel.LoginViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/dialog_til_api"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+
+            app:layout_constraintBottom_toTopOf="@id/dialog_til_secret"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.8">
+
+            <EditText
+                android:id="@+id/dialog_et_api"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="Api KEY"
+                android:inputType="textNoSuggestions"
+                android:text="@={lvm.tempApiKey}"
+                android:textColor="#000"
+                android:textSize="14sp" />
+
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/dialog_til_secret"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/dialog_til_api"
+            app:layout_constraintTop_toBottomOf="@id/dialog_til_api"
+            app:layout_constraintWidth_percent="0.8">
+
+            <EditText
+                android:id="@+id/dialog_et_secret"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="Secret KEY"
+                android:inputType="textNoSuggestions"
+                android:text="@={lvm.tempSecretKey}"
+                android:textColor="#000"
+                android:textSize="14sp" />
+
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <!--<EditText-->
+        <!--android:id="@+id/dialog_et_secret"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:hint="SECRET_KEY"-->
+        <!--android:text="@={av.secret}}"-->
+        <!--android:textSize="14sp"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@id/dialog_et_api"-->
+        <!--app:layout_constraintWidth_percent="0.7" />-->
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
