@@ -19,6 +19,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 class BinanceActivity : AppCompatActivity() {
 
@@ -42,35 +44,57 @@ class BinanceActivity : AppCompatActivity() {
 
 
         binanceViewModel.getIsAllSymbolPairSetting().observe(this, Observer { isSettingDone ->
-            if (isSettingDone && binanceViewModel.getLastCheckTimestamp() == 0L) binanceViewModel.initFirstAsset()
+            if (isSettingDone && binanceViewModel.getLastCheckTimestamp() == 0L) { // 첫 로그인시
+//                Log.d("fhrm", "BinanceActivity -onCreate(),    : first login")
+                binanceViewModel.initFirstAsset()
+            } else { // 아닐시
+//                Log.d("fhrm", "BinanceActivity -onCreate(),    : not first login")
+            }
         })
 
+        binanceViewModel.getAllFromRoom().observe(this, Observer { list ->
+            list.forEachIndexed { index, coin ->
+                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
+            }
+        })
+
+        /**
+         *
+         * coroutine ( 주기적으로 리프레쉬하는 함수 만들자리 )
+         * -> viewmodel.refreshProfit
+         * -> viewmodel.setLastCheckTimestamp
+         *
+         * observable은 하나로 묶는거 고려
+         *
+         */
 
         // *********** TEST *********** //
         binance_btn_test1.setOnClickListener {
             binanceViewModel.getAsset()
         }
         binance_btn_test2.setOnClickListener {
+//            binanceViewModel.checkIsAssetUpdate()
+//            binanceViewModel.test()
+            binanceViewModel.getDepositHistory()
+//            binanceViewModel.withraw()
+//            binanceViewModel.getSpecificTimeAvgPrice("BTCUSDT",1603194796570)
+//            binanceViewModel.gatherChangeAfterLastLogin()
         }
 
         binance_btn_test3.setOnClickListener {
             binanceViewModel.getCurrentTime()
+            Log.d("fhrm", "BinanceActivity -onCreate(),    getLastCheckTimestamp: ${binanceViewModel.getLastCheckTimestamp()}")
         }
 
         binance_btn_test4.setOnClickListener {
-
+            binanceViewModel.getAllSymbolPair()
         }
         binance_btn_test5.setOnClickListener {
-            binanceViewModel.assetList.forEachIndexed { index, coin ->
-                Log.d(
-                    "fhrm",
-                    "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}"
-                )
-            }
-
+            binanceViewModel.getAllFromRoom().value!!.forEachIndexed { index, coin ->
+                Log.d("fhrm","BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")}
         }
         binance_btn_test6.setOnClickListener {
-
+            binanceViewModel.getOrderHistory("XRPUSDT")
         }
 // **************************** //
 

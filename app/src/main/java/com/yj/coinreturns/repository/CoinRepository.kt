@@ -1,6 +1,7 @@
 package com.yj.coinreturns.repository
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.mvvm.mybinance.model.Coin
 import com.mvvm.mybinance.model.CoinDao
@@ -25,11 +26,12 @@ class CoinRepository(application: Application, exchange: String) {
     }
 
     fun insert(coin: Coin) {
+        Log.d("fhrm", "CoinRepository -insert(),    coin: ${coin.id}")
         mCoinDao.insert(coin)
     }
 
-    fun delete(coin: Coin) {
-        mCoinDao.delete(coin)
+    fun delete(symbol: String) {
+        mCoinDao.delete(symbol)
     }
 
     fun update(coin: Coin) {
