@@ -28,6 +28,12 @@ interface WithdrawService {
             @Query("timestamp") timestamp: Long)
             : Observable<List<WithdrawRequest>>
 
+
+    /**
+     * status
+     * 0: PENDING
+     * 1: SUCCESS
+     */
     @Headers(ENDPOINT_SECURITY_TYPE_SIGNED_HEADER)
     @GET("wapi/v3/depositHistory.html")
     fun depositHistory(

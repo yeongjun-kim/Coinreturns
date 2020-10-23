@@ -7,7 +7,12 @@ import androidx.lifecycle.*
 import com.cluttered.cryptocurrency.BinanceClient
 import com.cluttered.cryptocurrency.PublicBinanceClient
 import com.cluttered.cryptocurrency.model.account.AccountSnapshot
+import com.cluttered.cryptocurrency.model.account.Order
+import com.cluttered.cryptocurrency.model.account.OrderStatus
 import com.cluttered.cryptocurrency.model.marketdata.CandlestickInterval
+import com.cluttered.cryptocurrency.model.withdraw.DepositHistory
+import com.cluttered.cryptocurrency.model.withdraw.DepositStatus
+import com.cluttered.cryptocurrency.model.withdraw.WithdrawStatus
 import com.cluttered.cryptocurrency.services.AccountService
 import com.cluttered.cryptocurrency.services.WithdrawService.Companion.ONE_MINUTE_IN_MILLIS
 import com.cluttered.cryptocurrency.websocket.RxWebSocketEvent
@@ -28,6 +33,7 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.Instant
+import java.util.*
 import javax.crypto.Cipher.SECRET_KEY
 
 
@@ -38,17 +44,19 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
      * Pair Priority: 1. USDT, 2.BTC, 3.BNB
      * allSymbolPair: Binance 의 모든 Symbol, Pair 쌍을 가짐
      * isAllSymbolPairSetting: allSymbolPair 세팅이 끝나면 true
+     * changeList: 입금, 출금, 체결된 Order에 대한 변화를 넣는 List
      *
      */
 
     private var client = BinanceClient.create(App.prefs.apiBinance!!, App.prefs.secretBinance!!)
-    private var publicBinanceClient = PublicBinanceClient.create()
 
     private val mCoinRepository: CoinRepository
     private var mCoinList: LiveData<MutableList<Coin>>
     private var lastCheckTimestamp: Long = 0
     private val allSymbolPair = mutableListOf<Pair<String, String>>()
     private var isAllSymbolPairSetting = MutableLiveData(false)
+    private var changeList = mutableListOf(listOf<Any>())
+
 
 
     init {
@@ -63,237 +71,333 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     fun getIsAllSymbolPairSetting() = isAllSymbolPairSetting
 
 
+    /**
+     * gatherChangeAfterLastLogin() -> changeRightPairForBUYSELL() -> applyChangeToRoom()
+     */
     @SuppressLint("CheckResult")
     fun gatherChangeAfterLastLogin() {
-        var allSymbol = mCoinList.value!!.map { it -> it.symbol }.toMutableList()
-
-//        client.account.snapshot()
-//            .map { AccountSnapshot ->
-//                AccountSnapshot.balances.filter { it.free.toDouble() != 0.00000000 }
-//                    .filter { it.asset != "USDT" }.map { it.asset }.toMutableList()
-//            }.map{
-//                allSymbol.addAll(it)
-//                allSymbol.distinct()
-//            }
-//            .flatMap {symbolList ->
-//                Observable.fromIterable(symbolList)
-//            }
-//            .subscribeOn(Schedulers.io())
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe({
-//                Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    symbol: ${it}")
-//            },{
-//                Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    error: ${it.message}")
-//            },{
-//                Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    finish")
-//            })
-
+        var allSymbol = mCoinList.value!!.map { it.symbol }.toMutableList()
+        var isSettingOver = 0 // 3이 되면 deposit, withdraw, order 모두 세팅 끝난것
+        changeList.clear()
 
         /**
          * 얘가 룸, Asset 에 다 들어있는 symbol 리스트 갖고있는 Observable
          */
-        var symbolSettingObservable = client.account.snapshot()
-            .map { AccountSnapshot ->
-                AccountSnapshot.balances.filter { it.free.toDouble() != 0.00000000 }
-                    .filter { it.asset != "USDT" }.map { it.asset }.toMutableList()
-            }.map {
-                allSymbol.addAll(it)
-                allSymbol.distinct()
-            }
+        var symbolSettingObservable =
+            client.account.snapshot()
+                .map { AccountSnapshot ->
+                    AccountSnapshot.balances
+                        .filter {allSymbolPair.contains(Pair(it.asset,"USDT")) || allSymbolPair.contains(Pair(it.asset,"BTC")) || allSymbolPair.contains(Pair(it.asset, "BNB"))                        }
+                        .filter { it.free.toDouble() != 0.00000000 }
+                        .filter { it.asset != "USDT" }
+                        .map { it.asset }
+                        .toMutableList()
+                }.map {
+                    allSymbol.addAll(it)
+                    allSymbol.distinct()
+                }.flatMap { symbolList ->
+                    Observable.fromIterable(symbolList)
+                }
 
-        /**************************************************************************************
-         **************************************************************************************
-         **************************************************************************************
-         **************************************************************************************
-         **************************************************************************************
+
+
+        /**
+         * get deposit history & deposit timestamp symbol price
          */
-        symbolSettingObservable.flatMap { symbolList ->
-            Observable.fromIterable(symbolList)
-        }.flatMap { s ->
-            client.withdraw.depositHistory(asset = s, timestamp = lastCheckTimestamp)
+        symbolSettingObservable.flatMap { s ->
+            client.withdraw.depositHistory(
+                asset = s,
+                timestamp = Instant.now().toEpochMilli(),
+                startTime = lastCheckTimestamp
+            )
+        }.flatMap { it ->
+            Observable.fromIterable(it.depositList)
+        }.flatMap { deposit ->
+            var s = deposit.asset
+            var p = findPair(s)
+            var quantity = deposit.amount.toDouble()
+            var interval = CandlestickInterval.MINUTES_1
+            var starttime = deposit.insertTime
+            var endtime = starttime + 60000
+            client.marketData.candlesticks(
+                symbol = "$s$p",
+                interval = interval,
+                startTime = starttime,
+                endTime = endtime
+            )
+                .map { price ->
+                    listOf(
+                        "DEPOSIT",
+                        starttime,
+                        s,
+                        p,
+                        quantity,
+                        (price[0].high.toDouble() + price[0].low.toDouble()) / 2.0
+                    )
+                }
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                // 이러면 여기에 Room, Asset에 들어있는 자산에 대한 입금 내역만 나옴. 얘네를
-            },{
-                // 여긴 에러출력
-            },{
-                // 여기에다 이 함수내에 변수 하나 설정해놓고 플러스1 해주셈.
-                // 그리고 출금,입금,오더 에 대한 list 다 완성되고, 플러스 1 해준 변수가 3이 되면
-                // 그거 if(변수==3) 이면 완성된 list 변수로 넘기고
-                // 그것들에대한 해당시간대 시세랑 또 계산해서 업데이트 하는거 할것.
+            .subscribe({ list ->
+                changeList.add(list)
+            }, {
+            }, {
+                isSettingOver += 1
+                if (isSettingOver == 3) {
+                    changeRightPairForBUYSELL()
+                }
             })
-        /**************************************************************************************
-         **************************************************************************************
-         **************************************************************************************
-         **************************************************************************************
-         **************************************************************************************
+
+
+        /**
+         * get withdrawal history
          */
+        symbolSettingObservable.flatMap { s ->
+            client.withdraw.withdrawHistory(
+                asset = s,
+                timestamp = Instant.now().toEpochMilli(),
+                startTime = lastCheckTimestamp
+            )
+        }.flatMap {
+            Observable.fromIterable(it.withdrawList)
+                .filter { it.status == WithdrawStatus.COMPLETED }
+        }.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ withdraw ->
+                var s = withdraw.asset
+                var timestamp = withdraw.applyTime
+                var quantity = withdraw.amount.toDouble()
+
+                changeList.add(listOf("WITHDRAW", timestamp, s, quantity))
+            }, {
+            }, {
+                isSettingOver += 1
+                if (isSettingOver == 3) {
+                    changeRightPairForBUYSELL()
+                }
+            })
+
+        /**
+         * get order history
+         */
+        symbolSettingObservable.flatMap { s ->
+            var usdt = client.account.allOrders("${s}USDT").onErrorReturn { Collections.emptyList() }
+            var btc = client.account.allOrders("${s}BTC").onErrorReturn { Collections.emptyList() }
+            var bnb = client.account.allOrders("${s}BNB").onErrorReturn { Collections.emptyList() }
 
 
+            Observable.mergeDelayError(usdt,btc,bnb)
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                it.filter { it.status==OrderStatus.FILLED || it.status == OrderStatus.PARTIALLY_FILLED  }
+                    .filter { it.time > lastCheckTimestamp }
+                    .forEach {
+                        var timestamp = it.time
+                        var s = it.symbol.replace("USDT","").replace("BTC","").replace("BNB","")
+                        var p = if(it.symbol.contains("USDT")) "USDT" else if(it.symbol.contains("BTC")) "BTC" else "BNB"
+                        var quantity = it.executedQuantity.toDouble()
+                        var price = it.price.toDouble()
+                        var side = it.side
 
-    }
+                        changeList.add(listOf("ORDER",timestamp,side,s,p,quantity,price))
+                    }
+            }, {
+                isSettingOver += 1
+                if (isSettingOver == 3) {
+                    changeRightPairForBUYSELL()
+                }
+            }, {
+                isSettingOver += 1
+                if (isSettingOver == 3) {
+                    changeRightPairForBUYSELL()
+                }
+            })
 
-    fun test() {
+
     }
 
     @SuppressLint("CheckResult")
-    fun getDepositHistory() {
-        client.withdraw.depositHistory(
-            null, // S
-            null,
-            1602833760000, // 이곳에 lastcheck timestamp 넣으면 됨
-            null,
-            AccountService.ONE_MINUTE_IN_MILLIS,
-            Instant.now().toEpochMilli()
-        ).map { it.depositList }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                it.sortedBy { it.insertTime }
-                it.forEach {
-                    Log.d("fhrm", "BinanceViewModel -getDepositHistory(),    : ${it}")
-                }
-            }, { e ->
-                Log.d("fhrm", "TestActivity -onCreate(),    : ${e.message}")
+    fun changeRightPairForBUYSELL(){
+        setLastCheckTimestamp()
+        if(changeList.isNullOrEmpty()) return
+        if(changeList.any{it[0]=="ORDER"}){ // changeList 에 ORDER 항목이 있을경우
+            var tempList =  // CandleStick 으로 가격 확인해서 한번 더 수정해줘야하는 애들
+                changeList.filter { it[0].toString() == "ORDER" }
+                    .filter { it[2].toString() == "BUY" }
+                    .filter { it[4].toString() != findPair(it[3].toString()) || it[6].toString().toDouble() == 0.0} // 정해진 페어보다 하위 페어(ex, USDT 있는데 BTC 로 거래한 내역) 이거나, 시장가 내역으로가격이 0.0인 경우
+                    .map { it.toMutableList() }
+                    .toMutableList()
+
+            if(!tempList.isNullOrEmpty()){
+                changeList.removeAll(tempList)
+
+                client.general.time()
+                    .flatMap { time ->
+                        Observable.fromIterable(tempList)
+                            .flatMap {list ->
+                                var s = "${list[3]}"
+                                var p = "${list[4]}"
+                                var timestamp = list[1].toString().toLong()
+                                var price = list[6].toString().toDouble()
+
+                                if(price==0.0){ // 시장가 구매하였을때
+                                    if( timestamp+60000>time.serverTime) {
+                                        client.marketData.candlesticks(symbol = "$s$p",interval = CandlestickInterval.MINUTES_1,limit = 1)
+                                            .map { it ->
+                                                var avgPirce = (it[0].high.toDouble() + it[0].low.toDouble()) / 2.0
+                                                list[6] = avgPirce
+                                                list
+                                            }
+                                    }
+                                    else {
+                                        client.marketData.candlesticks(symbol = "$s$p",interval = CandlestickInterval.MINUTES_1,startTime = timestamp,endTime = timestamp+60000)
+                                            .map { it ->
+                                                var avgPirce = (it[0].high.toDouble() + it[0].low.toDouble()) / 2.0
+                                                list[6] = avgPirce
+                                                list
+                                            }
+                                    }
+                                }
+                                else {   // 다른 페어로 구매하였을때
+                                    client.marketData.candlesticks(symbol = "${p}${findPair(s)}",interval = CandlestickInterval.MINUTES_1,startTime = timestamp,endTime = timestamp+60000)
+                                        .map { it ->
+                                            var avgPirce = (it[0].high.toDouble() + it[0].low.toDouble()) / 2.0
+                                            list[4] = findPair(s)
+                                            list[6] = list[6].toString().toDouble()*avgPirce
+                                            list
+                                        }
+                                }
+                            }
+                    }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe ({
+                        // 이미 위에 map에서 값 다 변경해놨기 때문에 여기선 할것이 없음.
+                    },{
+                    },{
+                        changeList.addAll(tempList.map { it.toList() })
+                        applyChangeToRoom()
+                    })
+            }else{ // CandleStick으로 시세 확인할 내역 없음
+                applyChangeToRoom()
             }
-            )
-    }
-
-    fun withraw() {
-        client.withdraw.withdrawHistory(
-            null,
-            null,
-            null,
-            null,
-            ONE_MINUTE_IN_MILLIS,
-            Instant.now().toEpochMilli()
-        )
-            .map { it.withdrawList }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                it.forEach {
-                    Log.d("fhrm", "BinanceViewModel -withdraw(),    : ${it}")
-                }
-            }, { e ->
-                Log.d("fhrm", "TestActivity -onCreate(),    : ${e.message}")
-            }
-            )
-    }
-
-
-    fun deleteCoinFromDB(symbol: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            mCoinRepository.delete(symbol)
+        }else{
+            applyChangeToRoom()
         }
     }
 
-    /**
-     * 주기적으로 Asset 을 체크하여, 기존 mCoinList 와 비교하여 새로운 Asset이
-     * ADD   : [추가] -> 새로운 코인 매수 또는 입금
-     * DELETE: [삭제] -> 기존 코인 매도
-     * CHANGE: [수량증가] -> 기존 코인 추매 또는 입금 (거래내역 추적하여 평단 수정 작업 필요)
-     * CHANGE: [수량감소] -> 평단은 그대로이며 그냥 quantity 만 줄여주면됨
-     */
-    @SuppressLint("CheckResult")
-    fun checkIsAssetUpdate() {
-
-        client.account.snapshot()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                //
-//                var newAssetList =
-//                    it.balances.filter { it.free.toDouble() != 0.00000000 && it.asset != "USDT" }
-//                        .map { assetObject(it.asset, it.free.toDouble()) }
 
 
-                var newAssetList = listOf(
-                    assetObject(symbol = "XRP", quantity = 5.668587),
-                    assetObject(symbol = "ADD1", quantity = 1.668587),
-                    assetObject(symbol = "ADD2", quantity = 1.668587)
-                )
 
-                newAssetList.forEach {
-                    Log.d("fhrm", "BinanceViewModel -checkIsAssetUpdate(),    : ${it}")
-                }
+    fun applyChangeToRoom() {
 
-                var haveChangeSymbol = mutableListOf(listOf<Any>())
+        var orderedList = changeList.sortedBy { it[1].toString() }
 
+        orderedList.forEach {
+            val kind = it[0].toString()
+            if(kind=="ORDER") applyOrderToRoom(it)
+            else if(kind == "WITHDRAW") applyWithdrawToRoom(it)
+            else if(kind == "DEPOSIT") applyDepositToRoom(it)
+        }
+    }
 
-                newAssetList.forEach { asset ->
+    private fun applyDepositToRoom(it: List<Any>) {
+        val s = it[2].toString()
+        val p = it[3].toString()
+        val quantity = it[4].toString().toDouble()
+        val price = it[5].toString().toDouble()
+        var coin = mCoinList.value!!.find { it.symbol == s }
 
-                    var isInRoom = mCoinList.value!!.any { room -> asset.symbol == room.symbol }
+        if(coin==null){ // Room에 없으면 신규이니 그냥 넣으면 됨
+            var newCoin = Coin("binance", s, p, quantity, price, quantity * price)
+            insertCoinToDB(newCoin)
+        }else{
+            var newQuantity = coin.quantity + quantity
+            var newAvgPrice =
+                ((coin.avgPrice * coin.quantity) + (price * quantity)) / (coin.quantity + quantity)
+            var newPurchaseAmount = newQuantity * newAvgPrice
 
-                    if (isInRoom) {
-                        var isSameQuantity =
-                            mCoinList.value!!.any { room -> asset.symbol == room.symbol && asset.quantity == room.quantity }
-                        if (!isSameQuantity) {
-                            haveChangeSymbol.add(
-                                listOf(
-                                    "CHANGE",
-                                    asset.symbol,
-                                    asset.quantity
-                                )
-                            ) // ASSET, ROOM 존재, Quantity 다름 -> [수정]
+            coin.quantity = newQuantity
+            coin.avgPrice = newAvgPrice
+            coin.purchaseAmount = newPurchaseAmount
 
-                        }
-                    } else {
-                        Log.d(
-                            "fhrm",
-                            "BinanceViewModel -checkIsAssetUpdate(),    add: ${asset.symbol}"
-                        )
-                        haveChangeSymbol.add(
-                            listOf(
-                                "ADD",
-                                asset.symbol,
-                                asset.quantity
-                            )
-                        ) // ASSET 존재, ROOM 미존재 -> [추가]
-                    }
-
-                }
+            insertCoinToDB(coin)
+        }
 
 
-                mCoinList.value!!.forEach { room ->
-                    var isInAsset = newAssetList.any { asset -> room.symbol == asset.symbol }
-                    if (!isInAsset) haveChangeSymbol.add(
-                        listOf(
-                            "DELETE",
-                            room.symbol
-                        )
-                    ) // ASSET 미존재, ROOM 존재 -> [삭제]
-                }
-
-                Log.d(
-                    "fhrm",
-                    "BinanceViewModel -checkIsAssetUpdate(),    haveChangeSymbol.size: ${haveChangeSymbol.size}"
-                )
-                haveChangeSymbol.forEach lit@{ list ->
-                    if (list.isNullOrEmpty()) return@lit
-                    if (list[0] == "ADD") { // list[1]: Coin.symbol, list[2]: Coin.quantity
-
-                    } else if (list[0] == "CHANGE") { // list[1]: Coin.symbol, list[2]: Coin.quantity
-                    } else if (list[0] == "DELETE") { // list[1]: Coin.symbol
-                        deleteCoinFromDB(list[1].toString())
-                    }
-                }
-            }
 
     }
 
+    private fun applyWithdrawToRoom(it: List<Any>) {
+        val s = it[2].toString()
+        val quantity = it[3].toString().toDouble()
+        var coin = mCoinList.value!!.find { it.symbol == s }
+
+        if(coin==null){} // Room에 없으면 그냥 넘기기
+        else{
+            coin.quantity -= quantity
+            insertCoinToDB(coin)
+        }
+
+    }
+
+    private fun applyOrderToRoom(it: List<Any>) {
+        val side = it[2].toString()
+        val s = it[3].toString()
+        val p = it[4].toString()
+        var quantity = it[5].toString().toDouble()
+        var price = it[6].toString().toDouble()
+        var coin = mCoinList.value!!.find { it.symbol == s }
+
+        if(side=="BUY") { // 구매
+            if (coin == null) { // 기존 목록에 없다면 새로 추가
+                var newCoin = Coin("binance", s, p, quantity, price, quantity * price)
+                insertCoinToDB(newCoin)
+            } else { // 기존 목록에 있다면
+                var newQuantity = coin.quantity + quantity
+                var newAvgPrice =
+                    ((coin.avgPrice * coin.quantity) + (price * quantity)) / (coin.quantity + quantity)
+                var newPurchaseAmount = newQuantity * newAvgPrice
+
+                coin.quantity = newQuantity
+                coin.avgPrice = newAvgPrice
+                coin.purchaseAmount = newPurchaseAmount
+
+                insertCoinToDB(coin)
+            }
+        }else{ //판매
+            if(coin==null){} //Room에 없으면 그냥 넘기기
+            else{
+                coin.quantity -= quantity
+                insertCoinToDB(coin)
+            }
+        }
+    }
+
+
+    fun findPair(s: String): String {
+
+        if (allSymbolPair.contains(Pair(s, "USDT"))) return "USDT"
+        else if (allSymbolPair.contains(Pair(s, "BTC"))) return "BTC"
+        else return "BNB"
+    }
 
     @SuppressLint("CheckResult")
     fun getOrderHistory(inputSymbol: String) {
-        client.account.allOrders(inputSymbol)
+        client.account.allOrders(symbol = inputSymbol) // sp
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { it ->
+            .subscribe({ it ->
                 it.forEachIndexed { index, order ->
-                    Log.d("fhrm", "TestActivity -test(),    index: ${index}, order: ${order}")
+                    Log.d("fhrm", "BinanceViewModel -getOrderHistory(),    order: ${order}")
                 }
+            }, {
+                Log.d("fhrm", "BinanceViewModel -getOrderHistory(),    : error")
             }
+                , {
+                    Log.d("fhrm", "BinanceViewModel -getOrderHistory(),    : com")
+                })
     }
 
 
@@ -304,10 +408,11 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     fun getSpecificTimeAvgPrice(symbol: String, timestamp: Long) {
         // 특정시간 평균 가격 구하는 코드
         client.marketData.candlesticks(
-            symbol = symbol,
+            symbol = symbol,    //sp
             interval = CandlestickInterval.MINUTES_1,
-            startTime = timestamp,
-            endTime = timestamp + 60000
+            limit = 1
+//            startTime = timestamp,
+//            endTime = timestamp + 60000
         )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -335,8 +440,9 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
                 .subscribe({ ticker ->
                     var currentPrice = ticker.price.toDouble()
                     var percent =
-                        String.format("%.2f", ((currentPrice / coin.avgPrice) - 1) * 100).toDouble()
-                    var profilt = coin.purchaseAmount * (percent / 100)
+                        String.format("%.2f", ((currentPrice / coin.avgPrice) - 1) * 100)
+                            .toDouble()
+                    var profilt = String.format("%.6f",coin.purchaseAmount * (percent / 100) ).toDouble()
 
                     coin.percent = percent
                     coin.profit = profilt
@@ -348,6 +454,11 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun test() {
+        var a = mCoinList.value!![0]
+        a.percent=123.123
+    }
+
 
     /**
      * 가장 처음으로 로그인 했을때.
@@ -356,7 +467,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     @SuppressLint("CheckResult")
     fun initFirstAsset() {
         var tempList = mutableListOf<Coin>()
-
 
         client.account.snapshot()
             .map { AccountSnapshot ->
@@ -413,30 +523,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * asset.asset -> symbol ( not include pair )
-     * asset.free -> amount
-     */
-    @SuppressLint("CheckResult")
-    fun getAsset() {
-        client.account.snapshot()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                it.balances.forEach { asset ->
-                    if (asset.free.toDouble() != 0.00000000) {
-                        var symbol = asset.asset
-                        var quantity = asset.free.toDouble()
-                        Log.d(
-                            "fhrm",
-                            "BinanceViewModel -getAsset(),    symbol: ${symbol}, quantity: ${quantity}"
-                        )
-                    }
-                }
-
-            }
-    }
-
 
     @SuppressLint("CheckResult")
     fun setLastCheckTimestamp() {
@@ -451,8 +537,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
     @SuppressLint("CheckResult")
     fun getCurrentTime() {
-        var a = 0
-
         client.general.time()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -461,6 +545,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
                     "fhrm",
                     "BinanceViewModel -getCurrentTime(),    it.serverTime: ${it.serverTime}"
                 )
+                Log.d("fhrm", "BinanceViewModel -getCurrentTime(),    Instant.now().toEpochMilli(): ${Instant.now().toEpochMilli()}")
             }
     }
 
@@ -470,19 +555,16 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
         client.general.exchangeInfo()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { it ->
+            .subscribe({ it ->
                 it.symbols.forEachIndexed { index, symbol ->
-                    allSymbolPair.add(Pair(symbol.baseAsset, symbol.quoteAsset))
+                    if (symbol.quoteAsset == "USDT" || symbol.quoteAsset == "BTC" || symbol.quoteAsset == "BNB") // USDT, BTC, BNB 페어만 가져
+                        allSymbolPair.add(Pair(symbol.baseAsset, symbol.quoteAsset))
                 }
-
-                allSymbolPair.forEach {
-                    Log.d(
-                        "fhrm",
-                        "BinanceViewModel -getAllSymbolPair(),    symbol: ${it.first}, pair: ${it.second}"
-                    )
-                }
+            }, {
+                Log.d("fhrm", "BinanceViewModel -getAllSymbolPair(),    error: ${it.message}")
+            }, {
                 isAllSymbolPairSetting.value = true
-            }
+            })
     }
 
 

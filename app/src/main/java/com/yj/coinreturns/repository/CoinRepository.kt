@@ -25,14 +25,15 @@ class CoinRepository(application: Application, exchange: String) {
         mCoinDao.deleteAll()
     }
 
+
     fun insert(coin: Coin) {
-        Log.d("fhrm", "CoinRepository -insert(),    coin: ${coin.id}")
         mCoinDao.insert(coin)
     }
 
     fun delete(symbol: String) {
         mCoinDao.delete(symbol)
     }
+
 
     fun update(coin: Coin) {
         mCoinDao.update(coin)

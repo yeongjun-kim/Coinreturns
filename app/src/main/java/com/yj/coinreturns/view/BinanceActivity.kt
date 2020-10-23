@@ -14,6 +14,7 @@ import com.yj.coinreturns.model.App
 import com.yj.coinreturns.viewModel.BinanceViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.activity_binance.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -44,11 +45,12 @@ class BinanceActivity : AppCompatActivity() {
 
 
         binanceViewModel.getIsAllSymbolPairSetting().observe(this, Observer { isSettingDone ->
-            if (isSettingDone && binanceViewModel.getLastCheckTimestamp() == 0L) { // 첫 로그인시
-//                Log.d("fhrm", "BinanceActivity -onCreate(),    : first login")
-                binanceViewModel.initFirstAsset()
-            } else { // 아닐시
-//                Log.d("fhrm", "BinanceActivity -onCreate(),    : not first login")
+            if(isSettingDone){
+                if(binanceViewModel.getLastCheckTimestamp() == 0L){
+                    Log.d("fhrm", "BinanceActivity -onCreate(),    : firstLogin")
+                    binanceViewModel.initFirstAsset()
+                }
+                initCoroutine()
             }
         })
 
@@ -56,48 +58,71 @@ class BinanceActivity : AppCompatActivity() {
             list.forEachIndexed { index, coin ->
                 Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
             }
+            Log.d("fhrm", " ")
         })
 
-        /**
-         *
-         * coroutine ( 주기적으로 리프레쉬하는 함수 만들자리 )
-         * -> viewmodel.refreshProfit
-         * -> viewmodel.setLastCheckTimestamp
-         *
-         * observable은 하나로 묶는거 고려
-         *
-         */
+
 
         // *********** TEST *********** //
         binance_btn_test1.setOnClickListener {
-            binanceViewModel.getAsset()
         }
         binance_btn_test2.setOnClickListener {
-//            binanceViewModel.checkIsAssetUpdate()
-//            binanceViewModel.test()
-            binanceViewModel.getDepositHistory()
-//            binanceViewModel.withraw()
-//            binanceViewModel.getSpecificTimeAvgPrice("BTCUSDT",1603194796570)
-//            binanceViewModel.gatherChangeAfterLastLogin()
         }
-
         binance_btn_test3.setOnClickListener {
             binanceViewModel.getCurrentTime()
-            Log.d("fhrm", "BinanceActivity -onCreate(),    getLastCheckTimestamp: ${binanceViewModel.getLastCheckTimestamp()}")
+            Log.d(
+                "fhrm",
+                "BinanceActivity -onCreate(),    getLastCheckTimestamp: ${binanceViewModel.getLastCheckTimestamp()}"
+            )
         }
-
         binance_btn_test4.setOnClickListener {
-            binanceViewModel.getAllSymbolPair()
+            binanceViewModel.getAllFromRoom()
         }
         binance_btn_test5.setOnClickListener {
             binanceViewModel.getAllFromRoom().value!!.forEachIndexed { index, coin ->
-                Log.d("fhrm","BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")}
+                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
+            }
         }
         binance_btn_test6.setOnClickListener {
             binanceViewModel.getOrderHistory("XRPUSDT")
         }
-// **************************** //
+        binance_btn_test7.setOnClickListener {
+            binanceViewModel.gatherChangeAfterLastLogin()
+        }
+        binance_btn_test8.setOnClickListener {
+        }
+        binance_btn_test9.setOnClickListener {
+        }
+        binance_btn_test10.setOnClickListener {
+            binanceViewModel.getOrderHistory("XRPUSDT")
+        }
+        binance_btn_test11.setOnClickListener {
+            binanceViewModel.refreshProfit()
+        }
 
+
+
+    }
+
+    private fun initCoroutine() {
+        GlobalScope.launch(Dispatchers.Main) {
+//            while (true) {
+//                delay(1000L)
+//            }
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            while (true) {
+                binanceViewModel.gatherChangeAfterLastLogin()
+                delay(5000L)
+            }
+        }
+        GlobalScope.launch(Dispatchers.IO) {
+            while (true) {
+                binanceViewModel.refreshProfit()
+                delay(1000L)
+            }
+        }
 
     }
 
@@ -106,3 +131,4 @@ class BinanceActivity : AppCompatActivity() {
         Log.d("fhrm", "BinanceActivity -onDestroy(),    : ")
     }
 }
+

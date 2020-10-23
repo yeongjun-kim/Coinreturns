@@ -19,7 +19,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.BinanceActivity"/>
+        <activity
+            android:name=".view.BinanceActivity"
+            android:hardwareAccelerated="false" />
 
 
     </application>
