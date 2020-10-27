@@ -55,10 +55,10 @@ class BinanceActivity : AppCompatActivity() {
         })
 
         binanceViewModel.getAllFromRoom().observe(this, Observer { list ->
-            list.forEachIndexed { index, coin ->
-                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
-            }
-            Log.d("fhrm", " ")
+//            list.forEachIndexed { index, coin ->
+//                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
+//            }
+//            Log.d("fhrm", " ")
         })
 
 
@@ -87,7 +87,6 @@ class BinanceActivity : AppCompatActivity() {
             binanceViewModel.getOrderHistory("XRPUSDT")
         }
         binance_btn_test7.setOnClickListener {
-            binanceViewModel.gatherChangeAfterLastLogin()
         }
         binance_btn_test8.setOnClickListener {
         }
@@ -97,7 +96,9 @@ class BinanceActivity : AppCompatActivity() {
             binanceViewModel.getOrderHistory("XRPUSDT")
         }
         binance_btn_test11.setOnClickListener {
-            binanceViewModel.refreshProfit()
+//            binanceViewModel.refreshProfit()
+            binanceViewModel.gatherChangeAfterLastLogin()
+
         }
 
 
@@ -114,15 +115,15 @@ class BinanceActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.IO) {
             while (true) {
                 binanceViewModel.gatherChangeAfterLastLogin()
-                delay(5000L)
+                delay(3000L)
             }
         }
-        GlobalScope.launch(Dispatchers.IO) {
-            while (true) {
-                binanceViewModel.refreshProfit()
-                delay(1000L)
-            }
-        }
+//        GlobalScope.launch(Dispatchers.IO) {
+//            while (true) {
+//                binanceViewModel.refreshProfit()
+//                delay(1000L)
+//            }
+//        }
 
     }
 

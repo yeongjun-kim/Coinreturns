@@ -76,6 +76,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
      */
     @SuppressLint("CheckResult")
     fun gatherChangeAfterLastLogin() {
+        Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    ******************")
         var allSymbol = mCoinList.value!!.map { it.symbol }.toMutableList()
         var isSettingOver = 0 // 3이 되면 deposit, withdraw, order 모두 세팅 끝난것
         changeList.clear()
@@ -140,8 +141,10 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
             .subscribe({ list ->
                 changeList.add(list)
             }, {
+                Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    : deposit error: ${it.message}")
             }, {
                 isSettingOver += 1
+                Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    deposit: ${isSettingOver}")
                 if (isSettingOver == 3) {
                     changeRightPairForBUYSELL()
                 }
@@ -169,8 +172,10 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
                 changeList.add(listOf("WITHDRAW", timestamp, s, quantity))
             }, {
+                Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    : withdraw error : ${it.message}")
             }, {
                 isSettingOver += 1
+                Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    withdrawla: ${isSettingOver}")
                 if (isSettingOver == 3) {
                     changeRightPairForBUYSELL()
                 }
@@ -204,11 +209,13 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
                     }
             }, {
                 isSettingOver += 1
+                Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    order throw: ${isSettingOver}. ${it.message}")
                 if (isSettingOver == 3) {
                     changeRightPairForBUYSELL()
                 }
             }, {
                 isSettingOver += 1
+                Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    order comp: ${isSettingOver}")
                 if (isSettingOver == 3) {
                     changeRightPairForBUYSELL()
                 }
@@ -219,6 +226,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
     @SuppressLint("CheckResult")
     fun changeRightPairForBUYSELL(){
+        Log.d("fhrm", "BinanceViewModel -changeRightPairForBUYSELL(),    : end")
         setLastCheckTimestamp()
         if(changeList.isNullOrEmpty()) return
         if(changeList.any{it[0]=="ORDER"}){ // changeList 에 ORDER 항목이 있을경우
@@ -292,6 +300,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
     fun applyChangeToRoom() {
 
+        Log.d("fhrm", "BinanceViewModel -applyChangeToRoom(),    ***********************************")
         var orderedList = changeList.sortedBy { it[1].toString() }
 
         orderedList.forEach {
@@ -303,6 +312,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun applyDepositToRoom(it: List<Any>) {
+        Log.d("fhrm", "BinanceViewModel -applyDepositToRoom(),    ***********************************8")
         val s = it[2].toString()
         val p = it[3].toString()
         val quantity = it[4].toString().toDouble()
@@ -330,6 +340,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun applyWithdrawToRoom(it: List<Any>) {
+        Log.d("fhrm", "BinanceViewModel -applyWithdrawToRoom(),    *****************************************8")
         val s = it[2].toString()
         val quantity = it[3].toString().toDouble()
         var coin = mCoinList.value!!.find { it.symbol == s }
@@ -343,6 +354,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun applyOrderToRoom(it: List<Any>) {
+        Log.d("fhrm", "BinanceViewModel -applyOrderToRoom(),    ****************************************")
         val side = it[2].toString()
         val s = it[3].toString()
         val p = it[4].toString()
@@ -519,6 +531,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
     fun insertCoinToDB(coin: Coin) {
         viewModelScope.launch(Dispatchers.IO) {
+            Log.d("fhrm", "BinanceViewModel -insertCoinToDB(),    ****************************************")
             mCoinRepository.insert(coin)
         }
     }
