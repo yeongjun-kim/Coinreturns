@@ -5,17 +5,9 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.*
 import com.cluttered.cryptocurrency.BinanceClient
-import com.cluttered.cryptocurrency.PublicBinanceClient
-import com.cluttered.cryptocurrency.model.account.AccountSnapshot
-import com.cluttered.cryptocurrency.model.account.Order
 import com.cluttered.cryptocurrency.model.account.OrderStatus
 import com.cluttered.cryptocurrency.model.marketdata.CandlestickInterval
-import com.cluttered.cryptocurrency.model.withdraw.DepositHistory
-import com.cluttered.cryptocurrency.model.withdraw.DepositStatus
 import com.cluttered.cryptocurrency.model.withdraw.WithdrawStatus
-import com.cluttered.cryptocurrency.services.AccountService
-import com.cluttered.cryptocurrency.services.WithdrawService.Companion.ONE_MINUTE_IN_MILLIS
-import com.cluttered.cryptocurrency.websocket.RxWebSocketEvent
 import com.mvvm.mybinance.model.Coin
 import com.yj.coinreturns.model.App
 import com.yj.coinreturns.repository.CoinRepository
@@ -23,18 +15,9 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.launch
-import org.apache.xerces.dom.DOMMessageFormatter.init
-import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
 import java.time.Instant
 import java.util.*
-import javax.crypto.Cipher.SECRET_KEY
 
 
 class BinanceViewModel(application: Application) : AndroidViewModel(application) {
@@ -55,7 +38,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     private var lastCheckTimestamp: Long = 0
     private val allSymbolPair = mutableListOf<Pair<String, String>>()
     private var isAllSymbolPairSetting = MutableLiveData(false)
-    private var changeList = mutableListOf(listOf<Any>())
 
 
 
@@ -79,6 +61,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
         Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    ******************")
         var allSymbol = mCoinList.value!!.map { it.symbol }.toMutableList()
         var isSettingOver = 0 // 3이 되면 deposit, withdraw, order 모두 세팅 끝난것
+        var changeList = mutableListOf(listOf<Any>())
         changeList.clear()
 
         /**
@@ -146,7 +129,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
                 isSettingOver += 1
                 Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    deposit: ${isSettingOver}")
                 if (isSettingOver == 3) {
-                    changeRightPairForBUYSELL()
+                    changeRightPairForBUYSELL(changeList)
                 }
             })
 
@@ -177,7 +160,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
                 isSettingOver += 1
                 Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    withdrawla: ${isSettingOver}")
                 if (isSettingOver == 3) {
-                    changeRightPairForBUYSELL()
+                    changeRightPairForBUYSELL(changeList)
                 }
             })
 
@@ -211,13 +194,13 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
                 isSettingOver += 1
                 Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    order throw: ${isSettingOver}. ${it.message}")
                 if (isSettingOver == 3) {
-                    changeRightPairForBUYSELL()
+                    changeRightPairForBUYSELL(changeList)
                 }
             }, {
                 isSettingOver += 1
                 Log.d("fhrm", "BinanceViewModel -gatherChangeAfterLastLogin(),    order comp: ${isSettingOver}")
                 if (isSettingOver == 3) {
-                    changeRightPairForBUYSELL()
+                    changeRightPairForBUYSELL(changeList)
                 }
             })
 
@@ -225,7 +208,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     }
 
     @SuppressLint("CheckResult")
-    fun changeRightPairForBUYSELL(){
+    fun changeRightPairForBUYSELL(changeList:MutableList<List<Any>>){
         Log.d("fhrm", "BinanceViewModel -changeRightPairForBUYSELL(),    : end")
         setLastCheckTimestamp()
         if(changeList.isNullOrEmpty()) return
@@ -285,20 +268,20 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
                     },{
                     },{
                         changeList.addAll(tempList.map { it.toList() })
-                        applyChangeToRoom()
+                        applyChangeToRoom(changeList)
                     })
             }else{ // CandleStick으로 시세 확인할 내역 없음
-                applyChangeToRoom()
+                applyChangeToRoom(changeList)
             }
         }else{
-            applyChangeToRoom()
+            applyChangeToRoom(changeList)
         }
     }
 
 
 
 
-    fun applyChangeToRoom() {
+    fun applyChangeToRoom(changeList:MutableList<List<Any>>) {
 
         Log.d("fhrm", "BinanceViewModel -applyChangeToRoom(),    ***********************************")
         var orderedList = changeList.sortedBy { it[1].toString() }
