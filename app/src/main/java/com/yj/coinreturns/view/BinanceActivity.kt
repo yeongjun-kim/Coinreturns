@@ -51,18 +51,21 @@ class BinanceActivity : AppCompatActivity() {
                     Log.d("fhrm", "BinanceActivity -onCreate(),    : firstLogin")
                     binanceViewModel.initFirstAsset()
                 }
-//                initCoroutine()
-                waitGuest()
+                waitGetHaveToCheckSymbol()
+                waitRefreshProfit()
 
             }
         })
 
         binanceViewModel.getAllFromRoom().observe(this, Observer { list ->
-            //            list.forEachIndexed { index, coin ->
-//                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
-//            }
-//            Log.d("fhrm", " ")
+            list.forEachIndexed { index, coin ->
+                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
+            }
+            Log.d("fhrm", " ")
         })
+
+
+
 
 
         // *********** TEST *********** //
@@ -86,63 +89,49 @@ class BinanceActivity : AppCompatActivity() {
             }
         }
         binance_btn_test6.setOnClickListener {
-            binanceViewModel.getOrderHistory("XRPUSDT")
         }
         binance_btn_test7.setOnClickListener {
         }
         binance_btn_test8.setOnClickListener {
+            binanceViewModel.test()
         }
         binance_btn_test9.setOnClickListener {
+            binanceViewModel.getDeposit()
         }
         binance_btn_test10.setOnClickListener {
             binanceViewModel.getOrderHistory("XRPUSDT")
         }
         binance_btn_test11.setOnClickListener {
-            binanceViewModel.gatherChangeAfterLastLogin()
+            binanceViewModel.getHaveToCheckSymbol()
         }
 
 
     }
 
-//    private fun initCoroutine() {
-//        GlobalScope.launch(Dispatchers.Main) {
-//            //            while (true) {
-////                delay(1000L)
-////            }
-//        }
-//
-//        GlobalScope.launch(Dispatchers.IO) {
-//            while (true) {
-//                binanceViewModel.initFirst()
-//                binanceViewModel.initFirst()
-//                binanceViewModel.initFirst()
-//                delay(1000L)
-//            }
-//        }
-//        GlobalScope.launch(Dispatchers.IO) {
-//            while (true) {
-//                binanceViewModel.refreshProfit()
-//                delay(1000L)
-//            }
-//        }
-//
-//    }
 
     private val mDelayHandler: Handler by lazy {
         Handler()
     }
 
-    private fun waitGuest(){
-        mDelayHandler.postDelayed(::showGuest, 10000) // 10초 후에 showGuest 함수를 실행한다.
+    private fun waitGetHaveToCheckSymbol() {
+        mDelayHandler.postDelayed(::getHaveToCheckSymbol, 10000) // 10초 후에 showGuest 함수를 실행한다.
     }
 
-    private fun showGuest(){
-        // 실제 반복하는 코드를 여기에 적는다
-        binanceViewModel.gatherChangeAfterLastLogin()
-
-
-        waitGuest() // 코드 실행뒤에 계속해서 반복하도록 작업한다.
+    private fun waitRefreshProfit() {
+        mDelayHandler.postDelayed(::refreshProfit, 1000) // 10초 후에 showGuest 함수를 실행한다.
     }
+
+
+    private fun refreshProfit() {
+        binanceViewModel.refreshProfit()
+        waitRefreshProfit()
+    }
+
+    private fun getHaveToCheckSymbol() {
+        binanceViewModel.getHaveToCheckSymbol()
+        waitGetHaveToCheckSymbol() // 코드 실행뒤에 계속해서 반복하도록 작업한다.
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         Log.d("fhrm", "BinanceActivity -onDestroy(),    : ")
