@@ -7,22 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.cluttered.cryptocurrency.BinanceClient
-import com.cluttered.cryptocurrency.PublicBinanceClient
 import com.yj.coinreturns.R
 import com.yj.coinreturns.databinding.ActivityBinanceBinding
-import com.yj.coinreturns.model.App
 import com.yj.coinreturns.viewModel.BinanceViewModel
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.activity_binance.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 class BinanceActivity : AppCompatActivity() {
 
@@ -47,12 +35,14 @@ class BinanceActivity : AppCompatActivity() {
 
         binanceViewModel.getIsAllSymbolPairSetting().observe(this, Observer { isSettingDone ->
             if (isSettingDone) {
-                if (binanceViewModel.getLastCheckTimestamp() == 0L) {
-                    Log.d("fhrm", "BinanceActivity -onCreate(),    : firstLogin")
+                if (binanceViewModel.getLastCheckTimestamp() == 0L) { //첫로그인이라면
                     binanceViewModel.initFirstAsset()
+                    waitGetHaveToCheckSymbol()
+//                    waitRefreshProfit()
+                } else {
+                    getHaveToCheckSymbol()
+//                    refreshProfit()
                 }
-                waitGetHaveToCheckSymbol()
-                waitRefreshProfit()
 
             }
         })
@@ -63,9 +53,6 @@ class BinanceActivity : AppCompatActivity() {
             }
             Log.d("fhrm", " ")
         })
-
-
-
 
 
         // *********** TEST *********** //
@@ -93,16 +80,16 @@ class BinanceActivity : AppCompatActivity() {
         binance_btn_test7.setOnClickListener {
         }
         binance_btn_test8.setOnClickListener {
-            binanceViewModel.test()
         }
         binance_btn_test9.setOnClickListener {
-            binanceViewModel.getDeposit()
+            binanceViewModel.getHaveToCheckSymbol()
+
         }
         binance_btn_test10.setOnClickListener {
-            binanceViewModel.getOrderHistory("XRPUSDT")
+            binanceViewModel.getOrderHistory("ETHBTC")
         }
         binance_btn_test11.setOnClickListener {
-            binanceViewModel.getHaveToCheckSymbol()
+            binanceViewModel.test()
         }
 
 
@@ -114,7 +101,7 @@ class BinanceActivity : AppCompatActivity() {
     }
 
     private fun waitGetHaveToCheckSymbol() {
-        mDelayHandler.postDelayed(::getHaveToCheckSymbol, 10000) // 10초 후에 showGuest 함수를 실행한다.
+        mDelayHandler.postDelayed(::getHaveToCheckSymbol, 13000) // 10초 후에 showGuest 함수를 실행한다.
     }
 
     private fun waitRefreshProfit() {
