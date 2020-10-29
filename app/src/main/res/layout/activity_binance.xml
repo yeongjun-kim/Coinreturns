@@ -69,7 +69,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="test11" />
-        <EditText
+        <TextView
+            android:background="@drawable/result_drawable_binance"
             android:id="@+id/test"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

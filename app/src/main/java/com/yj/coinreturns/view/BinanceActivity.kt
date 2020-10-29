@@ -48,10 +48,10 @@ class BinanceActivity : AppCompatActivity() {
         })
 
         binanceViewModel.getAllFromRoom().observe(this, Observer { list ->
-//            list.forEachIndexed { index, coin ->
-//                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
-//            }
-//            Log.d("fhrm", " ")
+            list.forEachIndexed { index, coin ->
+                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
+            }
+            Log.d("fhrm", " ")
         })
 
 
@@ -98,16 +98,17 @@ class BinanceActivity : AppCompatActivity() {
     }
 
 
+
     private val mDelayHandler: Handler by lazy {
         Handler()
     }
 
     private fun waitGetHaveToCheckSymbol() {
-        mDelayHandler.postDelayed(::getHaveToCheckSymbol, 15000) // 15초 후에 showGuest 함수를 실행한다.
+        mDelayHandler.postDelayed(::getHaveToCheckSymbol, 13000) // 15초 후에 showGuest 함수를 실행한다.
     }
 
     private fun waitRefreshProfit() {
-        mDelayHandler.postDelayed(::refreshProfit, 2000) // 10초 후에 showGuest 함수를 실행한다.
+        mDelayHandler.postDelayed(::refreshProfit, 3000) // 10초 후에 showGuest 함수를 실행한다.
     }
 
 

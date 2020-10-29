@@ -417,7 +417,29 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                var changeList: MutableList<MutableList<Any>> = mutableListOf(mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0))
+                var changeList: MutableList<MutableList<Any>> =
+                    mutableListOf(
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
+                        mutableListOf("ORDER",1603990161166,"SELL","XRP","AUD",50.0,0.0),
+                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0)
+                    )
                 changeMarketPriceForOriginal(changeList)
             }
     }
@@ -449,6 +471,10 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
             Log.d("fhrm", "apply list    index: ${index}, list: ${mutableList}")
         }
 
+
+
+
+
         orderedList.forEach {
             val kind = it[0].toString()
             if (kind == "ORDER") applyOrderToRoom(it)
@@ -456,10 +482,21 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
             else if (kind == "DEPOSIT") applyDepositToRoom(it)
         }
 
+        /****************************************************************************************************************
+         ****************************************************************************************************************
+         ****************************************************************************************************************
+         ****************************************************************************************************************
+         *
+         * 여기서 위에 orderList.forEach 이거 한번에 묶어서 insertCoinToDB 이거 날려줘야할듯.
+         * 심볼당 1개로만 정리해서.
+         *
+         ****************************************************************************************************************
+         ****************************************************************************************************************
+         ****************************************************************************************************************
+         ****************************************************************************************************************/
     }
 
     private fun applyOrderToRoom(it: List<Any>) {
-
         val side = it[2].toString()
         val s = it[3].toString()
         val p = it[4].toString()
@@ -492,6 +529,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
                 insertCoinToDB(coin)
             }
         }
+
     }
 
     private fun applyDepositToRoom(it: List<Any>) {
@@ -676,7 +714,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
     fun insertCoinToDB(coin: Coin) {
         viewModelScope.launch(Dispatchers.IO) {
-
             mCoinRepository.insert(coin)
         }
     }
