@@ -44,7 +44,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
         mCoinRepository = CoinRepository(application, "binance")
         mCoinList = mCoinRepository.getAllFromRoom()
         lastCheckTimestamp = App.prefs.lastCheckTimeStampBinance
-//        lastCheckTimestamp = 1553802172110
     }
 
     fun getAllFromRoom() = mCoinList
@@ -353,7 +352,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
         }
         var haveToChangeList =
             changeList.filter { it[0] == "ORDER" }
-                .filter { it[2] == "BUY" }
+//                .filter { it[2] == "BUY" }
                 .filter { it[4] != findPair(it[3].toString()) }
 
         if(haveToChangeList.isNullOrEmpty()){ // 페어 바꿔줄것이 없으면 다음단계로
@@ -402,27 +401,39 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
 
     @SuppressLint("CheckResult")
-    fun test() {
-        lastCheckTimestamp = 1603903107630
-//        var a =
-//            mutableListOf(
-//                mutableListOf("ORDER", 1603886401000, "BUY", "XRP", "BTC", 50, 0.0),
-//                mutableListOf("ORDER", 1603886401001, "BUY", "XRP", "BNB", 50, 0.0),
-//                mutableListOf("ORDER", 1603886401002, "SELL", "XRP", "BNB", 50, 0.0),
-//                mutableListOf("ORDER", 1603886401003, "BUY", "XRP", "USDT", 50, 1.1),
-//                mutableListOf("ORDER", 1603886401004, "SELL", "XRP", "BTC", 50, 0.0)
-////                mutableListOf("ORDER", 1603886401003, "SELL", "BNB", "BTC", 50, 0.0),
-////                mutableListOf("ORDER", 1603886401003, "SELL", "BNB", "USDT", 50, 0.0),
-////                mutableListOf("ORDER", 1603886401003, "SELL", "BTC", "USDT", 50, 0.0)
-//            )
-//        changeMarketPriceForOriginal(a)
-
+    fun test1() {
         client.general.time()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                var changeList: MutableList<MutableList<Any>> = mutableListOf(mutableListOf("ORDER",it.serverTime,"BUY","XRP","BTC",77.0,0.0))
+                var changeList: MutableList<MutableList<Any>> = mutableListOf(mutableListOf("ORDER",it.serverTime,"BUY","XRP","AUD",100.0,0.0))
                 changeMarketPriceForOriginal(changeList)
+            }
+    }
+
+    @SuppressLint("CheckResult")
+    fun test2(){
+        client.general.time()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                var changeList: MutableList<MutableList<Any>> = mutableListOf(mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0))
+                changeMarketPriceForOriginal(changeList)
+            }
+    }
+
+    fun test3(s:String){
+        Log.d("fhrm", "BinanceViewModel -test3(),    findPair($s): ${findPair(s)}")
+    }
+
+    fun test4(){
+        client.general.exchangeInfo()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                it.rateLimits.forEach {
+                    Log.d("fhrm", "BinanceViewModel -test4(),    : ${it}")
+                }
             }
     }
 
@@ -444,6 +455,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
             else if (kind == "WITHDRAW") applyWithdrawToRoom(it)
             else if (kind == "DEPOSIT") applyDepositToRoom(it)
         }
+
     }
 
     private fun applyOrderToRoom(it: List<Any>) {
@@ -475,6 +487,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
             if (coin == null) {
             } //Room에 없으면 그냥 넘기기
             else {
+                coin.purchaseAmount -= quantity*price
                 coin.quantity -= quantity
                 insertCoinToDB(coin)
             }
@@ -716,35 +729,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     }
 
 
-    fun testDeposit() {
-        client.general.time()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                var test = mutableListOf(mutableListOf<Any>())
-                test.clear()
-                var a = mutableListOf("DEPOSIT", it.serverTime, "EOS", "BTC", 1, 2, 3)
-                test.add(a)
-                applyChangeToRoom(test)
-            }
-
-    }
-
-    fun testWithdraw() {
-//        changeList.add(listOf("WITHDRAW",it.applyTime,it.asset,it.amount.toDouble()))
-
-        client.general.time()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                var test = mutableListOf(mutableListOf<Any>())
-                test.clear()
-                var a = mutableListOf("WITHDRAW", it.serverTime, "XRP", 100)
-                test.add(a)
-                applyChangeToRoom(test)
-            }
-
-    }
 
 
     data class assetObject(

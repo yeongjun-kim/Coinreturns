@@ -37,10 +37,10 @@ class BinanceActivity : AppCompatActivity() {
             if (isSettingDone) {
                 if (binanceViewModel.getLastCheckTimestamp() == 0L) { //첫로그인이라면
                     binanceViewModel.initFirstAsset()
-                    waitGetHaveToCheckSymbol()
+//                    waitGetHaveToCheckSymbol()
 //                    waitRefreshProfit()
                 } else {
-                    getHaveToCheckSymbol()
+//                    getHaveToCheckSymbol()
 //                    refreshProfit()
                 }
 
@@ -48,10 +48,10 @@ class BinanceActivity : AppCompatActivity() {
         })
 
         binanceViewModel.getAllFromRoom().observe(this, Observer { list ->
-            list.forEachIndexed { index, coin ->
-                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
-            }
-            Log.d("fhrm", " ")
+//            list.forEachIndexed { index, coin ->
+//                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
+//            }
+//            Log.d("fhrm", " ")
         })
 
 
@@ -76,20 +76,22 @@ class BinanceActivity : AppCompatActivity() {
             }
         }
         binance_btn_test6.setOnClickListener {
-        }
-        binance_btn_test7.setOnClickListener {
-        }
-        binance_btn_test8.setOnClickListener {
-        }
-        binance_btn_test9.setOnClickListener {
-            binanceViewModel.getHaveToCheckSymbol()
-
-        }
-        binance_btn_test10.setOnClickListener {
             binanceViewModel.getOrderHistory("ETHBTC")
         }
+        binance_btn_test7.setOnClickListener {
+            binanceViewModel.getHaveToCheckSymbol()
+        }
+        binance_btn_test8.setOnClickListener {
+            binanceViewModel.test4()
+        }
+        binance_btn_test9.setOnClickListener {
+            binanceViewModel.test3(test.text.toString())
+        }
+        binance_btn_test10.setOnClickListener {
+            binanceViewModel.test1()
+        }
         binance_btn_test11.setOnClickListener {
-            binanceViewModel.test()
+            binanceViewModel.test2()
         }
 
 
@@ -101,11 +103,11 @@ class BinanceActivity : AppCompatActivity() {
     }
 
     private fun waitGetHaveToCheckSymbol() {
-        mDelayHandler.postDelayed(::getHaveToCheckSymbol, 13000) // 10초 후에 showGuest 함수를 실행한다.
+        mDelayHandler.postDelayed(::getHaveToCheckSymbol, 15000) // 15초 후에 showGuest 함수를 실행한다.
     }
 
     private fun waitRefreshProfit() {
-        mDelayHandler.postDelayed(::refreshProfit, 1000) // 10초 후에 showGuest 함수를 실행한다.
+        mDelayHandler.postDelayed(::refreshProfit, 2000) // 10초 후에 showGuest 함수를 실행한다.
     }
 
 

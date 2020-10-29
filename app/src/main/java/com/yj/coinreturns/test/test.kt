@@ -100,7 +100,6 @@ class test(application: Application) : AndroidViewModel(application) {
             })
     }
 
-
     @SuppressLint("CheckResult")
     fun gatherChangeAfterLastLogin(sList: List<String>) {
         var changeList = mutableListOf(listOf<Any>())
