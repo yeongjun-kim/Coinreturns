@@ -37,6 +37,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     private var lastCheckTimestamp: Long = 0
     private val allSymbolPair = mutableListOf<Pair<String, String>>()
     private var isAllSymbolPairSetting = MutableLiveData(false)
+    private var isIng = false
 
 
     init {
@@ -56,6 +57,8 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
      */
     @SuppressLint("CheckResult")
     fun getHaveToCheckSymbol() {
+        isIng = true
+        Log.d("fhrm", "BinanceViewModel -getHaveToCheckSymbol(),    : start")
         var allSymbol = mCoinList.value!!.map { it.symbol }.toMutableList()
 
         /**
@@ -214,9 +217,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
     @SuppressLint("CheckResult")
     fun changeMarketPriceForOriginal(changeList: MutableList<MutableList<Any>>) {
-        changeList.forEachIndexed { index, mutableList ->
-            Log.d("fhrm", "1    index: ${index}, list: ${mutableList}")
-        }
         var marketPriceList =
             changeList.filter { it[0] == "ORDER" }
                 .filter { it[6] == 0.0 }
@@ -264,9 +264,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun makeOppositeSideList(changeList: MutableList<MutableList<Any>>) {
-        changeList.forEachIndexed { index, mutableList ->
-            Log.d("fhrm", "2    index: ${index}, list: ${mutableList}")
-        }
         var orderList =
             changeList.filter { it[0] == "ORDER" }.toMutableList()
 
@@ -297,9 +294,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
     @SuppressLint("CheckResult")
     fun changeMarketPriceForNew(changeList: MutableList<MutableList<Any>>) {
-        changeList.forEachIndexed { index, mutableList ->
-            Log.d("fhrm", "3    index: ${index}, list: ${mutableList}")
-        }
         var marketPriceList =
             changeList.filter { it[0] == "ORDER" }
                 .filter { it[6] == 0.0 }
@@ -347,17 +341,13 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
     @SuppressLint("CheckResult")
     fun chagePair(changeList: MutableList<MutableList<Any>>) {
-        changeList.forEachIndexed { index, mutableList ->
-            Log.d("fhrm", "4    index: ${index}, list: ${mutableList}")
-        }
         var haveToChangeList =
             changeList.filter { it[0] == "ORDER" }
-//                .filter { it[2] == "BUY" }
                 .filter { it[4] != findPair(it[3].toString()) }
 
-        if(haveToChangeList.isNullOrEmpty()){ // 페어 바꿔줄것이 없으면 다음단계로
+        if (haveToChangeList.isNullOrEmpty()) { // 페어 바꿔줄것이 없으면 다음단계로
             applyChangeToRoom(changeList)
-        }else{ // 페어 바꿔줄것이 있으면
+        } else { // 페어 바꿔줄것이 있으면
             client.general.time()
                 .flatMap { currentTime ->
                     Observable.fromIterable(haveToChangeList)
@@ -400,55 +390,150 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     }
 
 
-    @SuppressLint("CheckResult")
-    fun test1() {
-        client.general.time()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                var changeList: MutableList<MutableList<Any>> = mutableListOf(mutableListOf("ORDER",it.serverTime,"BUY","XRP","AUD",100.0,0.0))
-                changeMarketPriceForOriginal(changeList)
+    fun applyChangeToRoom(changeList: MutableList<MutableList<Any>>) {
+        setLastCheckTimestamp()
+        isIng = false
+        var orderedList = changeList.sortedBy { it[1].toString() }.toMutableList()
+
+        orderedList.forEachIndexed { index, mutableList ->
+            Log.d("fhrm", "apply list    index: ${index}, list: ${mutableList}")
+        }
+
+
+        var insertList = mutableListOf<Coin>()
+
+        orderedList.forEach {
+            var s =
+                if (it[0].toString() == "ORDER") it[3].toString()
+                else it[2].toString()
+
+            var coin = mCoinList.value!!.find { it.symbol == s }
+            if (coin != null) insertList.add(coin)
+            else{
+                insertList.add(Coin("binance",s,findPair(s)))
             }
+        }
+
+        insertList = insertList.distinct().toMutableList()
+
+        insertList.forEachIndexed { index, coin ->
+            Log.d("fhrm", "final apply list    index: ${index}, coin: ${coin}")
+        }
+
+
+        orderedList.forEach {order ->
+            val kind = order[0].toString()
+
+            if(kind == "DEPOSIT") {
+                var coin = insertList.find { it.symbol == order[2].toString() }!!
+                coin = applyDeposit(coin,order)
+            }
+            else if(kind == "WITHDRAW"){
+                var coin = insertList.find { it.symbol == order[2].toString() }!!
+                coin = applyWithdraw(coin,order)
+            }else if(kind == "ORDER"){
+                var coin = insertList.find { it.symbol == order[3].toString() }!!
+                coin = applyOrder(coin,order)
+            }
+        }
+
+        insertList.forEach {
+            insertCoinToDB(it)
+        }
+
     }
 
+    fun applyOrder(coin:Coin, order:MutableList<Any>):Coin {
+        val side = order[2].toString()
+        var quantity = order[5].toString().toDouble()
+        var price = order[6].toString().toDouble()
+
+        if(side == "BUY"){
+            var newQuantity = coin.quantity + quantity
+            var newAvgPrice =
+                ((coin.avgPrice * coin.quantity) + (price * quantity)) / (coin.quantity + quantity)
+            var newPurchaseAmount = newQuantity * newAvgPrice
+
+            coin.quantity = newQuantity
+            coin.avgPrice = newAvgPrice
+            coin.purchaseAmount = newPurchaseAmount
+        }else{
+            coin.purchaseAmount -= quantity * price
+            coin.quantity -= quantity
+        }
+        return coin
+    }
+
+
+    fun applyWithdraw(coin:Coin, order:MutableList<Any>):Coin {
+        val quantity = order[3].toString().toDouble()
+        coin.quantity -= quantity
+        return coin
+    }
+
+    fun applyDeposit(coin:Coin, order:MutableList<Any>):Coin{
+        val quantity = order[4].toString().toDouble()
+        var price = order[5].toString().toDouble()
+        var newQuantity = coin.quantity + quantity
+        var newAvgPrice =
+            ((coin.avgPrice * coin.quantity) + (price * quantity)) / (coin.quantity + quantity)
+        var newPurchaseAmount = newQuantity * newAvgPrice
+
+        coin.quantity = newQuantity
+        coin.avgPrice = newAvgPrice
+        coin.purchaseAmount = newPurchaseAmount
+
+        return coin
+    }
+
+
+
+
+
     @SuppressLint("CheckResult")
-    fun test2(){
+    fun test2() {
         client.general.time()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 var changeList: MutableList<MutableList<Any>> =
                     mutableListOf(
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-//                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0),
-                        mutableListOf("ORDER",1603990161166,"SELL","XRP","AUD",50.0,0.0),
-                        mutableListOf("ORDER",it.serverTime,"SELL","XRP","AUD",50.0,0.0)
+                        mutableListOf("ORDER", lastCheckTimestamp+1000000000000, "SELL", "XRP", "AUD", 50.0, 0.0),
+                        mutableListOf("ORDER", lastCheckTimestamp+2000000000000, "SELL", "XRP", "AUD", 50.0, 0.0),
+                        mutableListOf("DEPOSIT", lastCheckTimestamp+3000000000000, "XRP", "USDT", 50.0, 0.0),
+                        mutableListOf("WITHDRAW", lastCheckTimestamp+4000000000000, "XRP",50.0),
+
+                        mutableListOf("ORDER", lastCheckTimestamp+5000000000000, "SELL", "ENJ", "BUSD", 50.0, 0.0),
+                        mutableListOf("ORDER", lastCheckTimestamp+6000000000000, "SELL", "ENJ", "BUSD", 50.0, 0.0),
+                        mutableListOf("DEPOSIT", lastCheckTimestamp+7000000000000, "ENJ", "USDT", 50.0, 2.0),
+                        mutableListOf("WITHDRAW", lastCheckTimestamp+8000000000000, "ENJ",50.0)
                     )
                 changeMarketPriceForOriginal(changeList)
             }
     }
 
-    fun test3(s:String){
+
+
+
+
+
+    @SuppressLint("CheckResult")
+    fun test1() {
+        client.general.time()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                Log.d("fhrm", "BinanceViewModel -test1(),    servertime: ${it.serverTime-600.toLong()}, Instant.now().toEpochMilli(): ${Instant.now().toEpochMilli()}, System.currentTimeMillis(): ${System.currentTimeMillis()}")
+            }
+    }
+
+
+
+    fun test3(s: String) {
         Log.d("fhrm", "BinanceViewModel -test3(),    findPair($s): ${findPair(s)}")
     }
 
-    fun test4(){
+    fun test4() {
         client.general.exchangeInfo()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -460,119 +545,28 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     }
 
 
-    fun applyChangeToRoom(changeList: MutableList<MutableList<Any>>) {
-        changeList.forEachIndexed { index, mutableList ->
-            Log.d("fhrm", "5    index: ${index}, list: ${mutableList}")
-        }
-        setLastCheckTimestamp()
-        var orderedList = changeList.sortedBy { it[1].toString() }.toMutableList()
-
-        orderedList.forEachIndexed { index, mutableList ->
-            Log.d("fhrm", "apply list    index: ${index}, list: ${mutableList}")
-        }
 
 
 
 
 
-        orderedList.forEach {
-            val kind = it[0].toString()
-            if (kind == "ORDER") applyOrderToRoom(it)
-            else if (kind == "WITHDRAW") applyWithdrawToRoom(it)
-            else if (kind == "DEPOSIT") applyDepositToRoom(it)
-        }
-
-        /****************************************************************************************************************
-         ****************************************************************************************************************
-         ****************************************************************************************************************
-         ****************************************************************************************************************
-         *
-         * 여기서 위에 orderList.forEach 이거 한번에 묶어서 insertCoinToDB 이거 날려줘야할듯.
-         * 심볼당 1개로만 정리해서.
-         *
-         ****************************************************************************************************************
-         ****************************************************************************************************************
-         ****************************************************************************************************************
-         ****************************************************************************************************************/
-    }
-
-    private fun applyOrderToRoom(it: List<Any>) {
-        val side = it[2].toString()
-        val s = it[3].toString()
-        val p = it[4].toString()
-        var quantity = it[5].toString().toDouble()
-        var price = it[6].toString().toDouble()
-        var coin = mCoinList.value!!.find { it.symbol == s }
-
-        if (side == "BUY") { // 구매
-            if (coin == null) { // 기존 목록에 없다면 새로 추가
-                var newCoin = Coin("binance", s, p, quantity, price, quantity * price)
-                insertCoinToDB(newCoin)
-            } else { // 기존 목록에 있다면
-                var newQuantity = coin.quantity + quantity
-                var newAvgPrice =
-                    ((coin.avgPrice * coin.quantity) + (price * quantity)) / (coin.quantity + quantity)
-                var newPurchaseAmount = newQuantity * newAvgPrice
-
-                coin.quantity = newQuantity
-                coin.avgPrice = newAvgPrice
-                coin.purchaseAmount = newPurchaseAmount
-
-                insertCoinToDB(coin)
-            }
-        } else { //판매
-            if (coin == null) {
-            } //Room에 없으면 그냥 넘기기
-            else {
-                coin.purchaseAmount -= quantity*price
-                coin.quantity -= quantity
-                insertCoinToDB(coin)
-            }
-        }
-
-    }
-
-    private fun applyDepositToRoom(it: List<Any>) {
-
-        val s = it[2].toString()
-        val p = it[3].toString()
-        val quantity = it[4].toString().toDouble()
-        val price = it[5].toString().toDouble()
-        var coin = mCoinList.value!!.find { it.symbol == s }
-
-        if (coin == null) { // Room에 없으면 신규이니 그냥 넣으면 됨
-            var newCoin = Coin("binance", s, p, quantity, price, quantity * price)
-            insertCoinToDB(newCoin)
-        } else {
-            var newQuantity = coin.quantity + quantity
-            var newAvgPrice =
-                ((coin.avgPrice * coin.quantity) + (price * quantity)) / (coin.quantity + quantity)
-            var newPurchaseAmount = newQuantity * newAvgPrice
-
-            coin.quantity = newQuantity
-            coin.avgPrice = newAvgPrice
-            coin.purchaseAmount = newPurchaseAmount
-
-            insertCoinToDB(coin)
-        }
 
 
-    }
 
-    private fun applyWithdrawToRoom(it: List<Any>) {
 
-        val s = it[2].toString()
-        val quantity = it[3].toString().toDouble()
-        var coin = mCoinList.value!!.find { it.symbol == s }
 
-        if (coin == null) {
-        } // Room에 없으면 그냥 넘기기
-        else {
-            coin.quantity -= quantity
-            insertCoinToDB(coin)
-        }
 
-    }
+
+
+
+
+
+
+
+
+
+
+
 
 
     fun findPair(s: String): String {
@@ -632,6 +626,8 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
 
     fun refreshProfit() {
+        if(isIng) return // order history 긁는 작업중이면 return
+
         mCoinList.value?.forEach { coin ->
             client.marketData.tickerPrice("${coin.symbol}${coin.pair}")
                 .subscribeOn(Schedulers.io())
@@ -764,8 +760,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
                 isAllSymbolPairSetting.value = true
             })
     }
-
-
 
 
     data class assetObject(

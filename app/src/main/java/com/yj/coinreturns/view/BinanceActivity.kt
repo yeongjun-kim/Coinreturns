@@ -37,21 +37,21 @@ class BinanceActivity : AppCompatActivity() {
             if (isSettingDone) {
                 if (binanceViewModel.getLastCheckTimestamp() == 0L) { //첫로그인이라면
                     binanceViewModel.initFirstAsset()
-//                    waitGetHaveToCheckSymbol()
-//                    waitRefreshProfit()
+                    waitGetHaveToCheckSymbol()
+                    waitRefreshProfit()
                 } else {
-//                    getHaveToCheckSymbol()
-//                    refreshProfit()
+                    getHaveToCheckSymbol()
+                    refreshProfit()
                 }
 
             }
         })
 
         binanceViewModel.getAllFromRoom().observe(this, Observer { list ->
-            list.forEachIndexed { index, coin ->
-                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
-            }
-            Log.d("fhrm", " ")
+//            list.forEachIndexed { index, coin ->
+//                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
+//            }
+//            Log.d("fhrm", " ")
         })
 
 
@@ -119,7 +119,7 @@ class BinanceActivity : AppCompatActivity() {
 
     private fun getHaveToCheckSymbol() {
         binanceViewModel.getHaveToCheckSymbol()
-        waitGetHaveToCheckSymbol() // 코드 실행뒤에 계속해서 반복하도록 작업한다.
+        waitGetHaveToCheckSymbol()
     }
 
     override fun onDestroy() {
