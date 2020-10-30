@@ -32,7 +32,7 @@ interface AccountService {
             @Query("icebergQty") icebergQuantity: BigDecimal? = null,
             @Query("newOrderRespType") responseType: OrderResponseType = RESULT,
             @Query("recvWindow") receivingWindow: Long = ONE_MINUTE_IN_MILLIS,
-            @Query("timestamp") timestamp: Long = Instant.now().toEpochMilli())
+            @Query("timestamp") timestamp: Long = System.currentTimeMillis())
             : Observable<OrderResult>
 
     @Headers(ENDPOINT_SECURITY_TYPE_SIGNED_HEADER)
@@ -49,7 +49,7 @@ interface AccountService {
             @Query("icebergQty") icebergQuantity: BigDecimal? = null,
             @Query("newOrderRespType") responseType: OrderResponseType = RESULT,
             @Query("recvWindow") receivingWindow: Long = ONE_MINUTE_IN_MILLIS,
-            @Query("timestamp") timestamp: Long = Instant.now().toEpochMilli())
+            @Query("timestamp") timestamp: Long = System.currentTimeMillis())
             : Observable<OrderResult>
 
     @Headers(ENDPOINT_SECURITY_TYPE_SIGNED_HEADER)
@@ -58,7 +58,7 @@ interface AccountService {
             @Query("symbol") symbol: String,
             @Query("orderId") orderId: Long,
             @Query("recvWindow") receivingWindow: Long = ONE_MINUTE_IN_MILLIS,
-            @Query("timestamp") timestamp: Long = Instant.now().toEpochMilli())
+            @Query("timestamp") timestamp: Long = System.currentTimeMillis())
 
     @Headers(ENDPOINT_SECURITY_TYPE_SIGNED_HEADER)
     @GET("api/v3/order")
@@ -66,7 +66,7 @@ interface AccountService {
             @Query("symbol") symbol: String,
             @Query("origClientOrderId") clientOrderId: String,
             @Query("recvWindow") receivingWindow: Long = ONE_MINUTE_IN_MILLIS,
-            @Query("timestamp") timestamp: Long = Instant.now().toEpochMilli())
+            @Query("timestamp") timestamp: Long = System.currentTimeMillis())
             : Observable<Order>
 
     @Headers(ENDPOINT_SECURITY_TYPE_SIGNED_HEADER)
@@ -76,7 +76,7 @@ interface AccountService {
             @Query("orderId") orderId: Long,
             @Query("newClientOrderId") newClientOrderId: String? = null,
             @Query("recvWindow") receivingWindow: Long = ONE_MINUTE_IN_MILLIS,
-            @Query("timestamp") timestamp: Long = Instant.now().toEpochMilli())
+            @Query("timestamp") timestamp: Long = System.currentTimeMillis())
             : Observable<CancelledOrder>
 
     @Headers(ENDPOINT_SECURITY_TYPE_SIGNED_HEADER)
@@ -86,7 +86,7 @@ interface AccountService {
             @Query("origClientOrderId") clientOrderId: String,
             @Query("newClientOrderId") newClientOrderId: String? = null,
             @Query("recvWindow") receivingWindow: Long = ONE_MINUTE_IN_MILLIS,
-            @Query("timestamp") timestamp: Long = Instant.now().toEpochMilli())
+            @Query("timestamp") timestamp: Long = System.currentTimeMillis())
             : Observable<CancelledOrder>
 
     @Headers(ENDPOINT_SECURITY_TYPE_SIGNED_HEADER)
@@ -94,7 +94,7 @@ interface AccountService {
     fun openOrders(
             @Query("symbol") symbol: String? = null,
             @Query("recvWindow") receivingWindow: Long = ONE_MINUTE_IN_MILLIS,
-            @Query("timestamp") timestamp: Long = Instant.now().toEpochMilli())
+            @Query("timestamp") timestamp: Long = System.currentTimeMillis())
             : Observable<List<Order>>
 
     @Headers(ENDPOINT_SECURITY_TYPE_SIGNED_HEADER)
@@ -104,14 +104,14 @@ interface AccountService {
             @Query("orderId") orderId: Long? = null,
             @Query("limit") limit: Int? = null,
             @Query("recvWindow") receivingWindow: Long = ONE_MINUTE_IN_MILLIS,
-            @Query("timestamp") timestamp: Long = Instant.now().toEpochMilli())
+            @Query("timestamp") timestamp: Long = System.currentTimeMillis())
             : Observable<List<Order>>
 
     @Headers(ENDPOINT_SECURITY_TYPE_SIGNED_HEADER)
     @GET("api/v3/account")
     fun snapshot(
             @Query("recvWindow") receivingWindow: Long = ONE_MINUTE_IN_MILLIS,
-            @Query("timestamp") timestamp: Long = Instant.now().toEpochMilli())
+            @Query("timestamp") timestamp: Long = System.currentTimeMillis())
             : Observable<AccountSnapshot>
 
     @Headers(ENDPOINT_SECURITY_TYPE_SIGNED_HEADER)
@@ -121,7 +121,7 @@ interface AccountService {
             @Query("limit") limit: Int? = null,
             @Query("fromId") fromId: Long? = null,
             @Query("recvWindow") receivingWindow: Long = ONE_MINUTE_IN_MILLIS,
-            @Query("timestamp") timestamp: Long = Instant.now().toEpochMilli())
+            @Query("timestamp") timestamp: Long = System.currentTimeMillis())
             : Observable<List<Trade>>
 
     /* ######## Buy by Type ######## */

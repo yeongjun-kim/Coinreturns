@@ -105,7 +105,7 @@ class test(application: Application) : AndroidViewModel(application) {
         var changeList = mutableListOf(listOf<Any>())
         changeList.clear()
 
-        client.withdraw.depositHistory(timestamp = Instant.now().toEpochMilli()) // Check Deposit
+        client.withdraw.depositHistory(timestamp = System.currentTimeMillis()) // Check Deposit
             .flatMapIterable { it.depositList }
             .filter { it.insertTime >= lastCheckTimestamp } // status는 체크할필요없음 ( PENDING, SUCCESS 둘다 어쨋든 들어오는거고, 펜딩과 성공의 inserttime이 변경되지 않아서. )
             .flatMap { deposit ->
@@ -134,7 +134,7 @@ class test(application: Application) : AndroidViewModel(application) {
             .toObservable()
             .flatMap {
                 // Check Withdraw
-                client.withdraw.withdrawHistory(timestamp = Instant.now().toEpochMilli()) // Deposit 과 동
+                client.withdraw.withdrawHistory(timestamp = System.currentTimeMillis()) // Deposit 과 동
             }
             .flatMapIterable { it.withdrawList }
             .filter { it.applyTime >= lastCheckTimestamp } // Deposit 과 동일
@@ -676,7 +676,7 @@ class test(application: Application) : AndroidViewModel(application) {
                 )
                 Log.d(
                     "fhrm",
-                    "BinanceViewModel -getCurrentTime(),    Instant.now().toEpochMilli(): ${Instant.now().toEpochMilli()}"
+                    "BinanceViewModel -getCurrentTime(),    System.currentTimeMillis(): ${System.currentTimeMillis()}"
                 )
             }
     }

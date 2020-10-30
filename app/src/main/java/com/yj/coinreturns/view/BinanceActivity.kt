@@ -76,7 +76,7 @@ class BinanceActivity : AppCompatActivity() {
             }
         }
         binance_btn_test6.setOnClickListener {
-            binanceViewModel.getOrderHistory("ETHBTC")
+            binanceViewModel.getOrderHistory("XRPBTC")
         }
         binance_btn_test7.setOnClickListener {
             binanceViewModel.getHaveToCheckSymbol()
