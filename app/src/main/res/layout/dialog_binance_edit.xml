@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.yj.coinreturns.viewModel.BinanceViewModel" />
+
+        <variable
+            name="coin"
+            type="com.mvvm.mybinance.model.Coin" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp">
+
+        <TextView
+            android:id="@+id/dialog_binance_temp1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Balance"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/dialog_binance_balance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{Double.toString(coin.quantity)}"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/dialog_binance_temp1" />
+
+        <TextView
+            android:id="@+id/dialog_binance_temp2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Average Price"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@id/dialog_binance_temp1"
+            app:layout_constraintTop_toBottomOf="@id/dialog_binance_balance" />
+
+        <EditText
+            android:id="@+id/dialog_binance_avgPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{Double.toString(coin.avgPrice)}"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/dialog_binance_temp2" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

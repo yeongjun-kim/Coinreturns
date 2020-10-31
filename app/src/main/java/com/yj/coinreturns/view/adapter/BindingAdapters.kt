@@ -48,13 +48,13 @@ object BindingAdapters {
         else
             s = bigdecimal.setScale(8, RoundingMode.HALF_UP).toString()
 
-        if(s.toBigDecimal()>0.toBigDecimal())
+        if (s.toBigDecimal() > 0.toBigDecimal())
             view.text = dividePorint("+$s")
         else
             view.text = dividePorint(s)
     }
 
-    fun dividePorint(s:String):String{
+    fun dividePorint(s: String): String {
         var temp = s.split('.')
 
         val formatter = DecimalFormat("###,###")

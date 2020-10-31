@@ -666,7 +666,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
                         String.format("%.2f", ((currentPrice / coin.avgPrice) - 1) * 100)
                             .toDouble()
                     var profilt =
-                        String.format("%.6f", coin.purchaseAmount * (percent / 100)).toDouble()
+                        String.format("%.8f", coin.purchaseAmount * (percent / 100)).toDouble()
 
                     coin.percent = percent
                     coin.profit = profilt

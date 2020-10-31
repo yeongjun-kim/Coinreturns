@@ -3,6 +3,8 @@ package com.yj.coinreturns.view
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.LayoutInflater
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mvvm.mybinance.model.Coin
 import com.yj.coinreturns.R
 import com.yj.coinreturns.databinding.ActivityBinanceBinding
+import com.yj.coinreturns.databinding.DialogBinanceEditBinding
 import com.yj.coinreturns.test.test
 import com.yj.coinreturns.view.adapter.BinanceRvAdapter
 import com.yj.coinreturns.viewModel.BinanceViewModel
@@ -87,6 +90,7 @@ class BinanceActivity : AppCompatActivity() {
         mAdapter.listener = object :BinanceRvAdapter.ClickListener{
             override fun onShortClick(position: Int) {
                 Log.d("fhrm", "BinanceActivity -onShortClick(),    : ${mAdapter.coinList[position]}")
+                openDialog(mAdapter.coinList[position])
             }
 
         }
@@ -97,6 +101,45 @@ class BinanceActivity : AppCompatActivity() {
             adapter = mAdapter
         }
     }
+
+    private fun openDialog(coin:Coin){
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_binance_edit,null,false)
+        val binding = DialogBinanceEditBinding.bind(view)
+        binding.coin = coin
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("EDIT")
+            .setView(view)
+            .setPositiveButton("OK"){_,_->
+
+            }
+            .setNegativeButton("CANCEL",null)
+            .create()
+        dialog.show()
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     override fun onResume() {
         super.onResume()
