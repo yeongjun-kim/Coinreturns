@@ -7,7 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.mvvm.mybinance.model.Coin
 import com.yj.coinreturns.R
 import com.yj.coinreturns.databinding.ActivityBinanceBinding
 import com.yj.coinreturns.test.test
@@ -56,6 +58,7 @@ class BinanceActivity : AppCompatActivity() {
         })
 
         binanceViewModel.getAllFromRoom().observe(this, Observer { list ->
+            list.sortWith(compareByDescending<Coin>{it.pair}.thenByDescending { it.purchaseAmount })
             mAdapter.setList(list)
         })
 
@@ -81,6 +84,13 @@ class BinanceActivity : AppCompatActivity() {
     }
 
     private fun initRv() {
+        mAdapter.listener = object :BinanceRvAdapter.ClickListener{
+            override fun onShortClick(position: Int) {
+                Log.d("fhrm", "BinanceActivity -onShortClick(),    : ${mAdapter.coinList[position]}")
+            }
+
+        }
+
         binding.binanceRv.apply {
             layoutManager = LinearLayoutManager(this@BinanceActivity)
             setHasFixedSize(true)

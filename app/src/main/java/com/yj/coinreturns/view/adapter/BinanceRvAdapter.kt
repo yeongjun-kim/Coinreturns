@@ -43,16 +43,12 @@ class BinanceRvAdapter :RecyclerView.Adapter<BinanceRvAdapter.CustomViewHolder>(
 
     interface ClickListener{
         fun onShortClick(position:Int)
-        fun onLongClick(position:Int)
     }
 
     class CustomViewHolder(val binding: ItemBinanceRvBinding, val listener: ClickListener?) : RecyclerView.ViewHolder(binding.root ) {
         init {
             itemView.setOnClickListener { listener?.onShortClick(adapterPosition)}
-            itemView.setOnLongClickListener {
-                listener?.onLongClick(adapterPosition)
-                return@setOnLongClickListener true
-            }
+
         }
 
         fun bind(item: Coin) {

@@ -26,7 +26,7 @@
             android:hint="S"
             android:text="@{coin.symbol}"
             android:textColor="#000"
-            android:textSize="24dp"
+            android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -42,7 +42,7 @@
             android:layout_marginStart="4dp"
             android:hint="P"
             android:text="@{coin.pair}"
-            android:textSize="16sp"
+            android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="@id/item_binance_tv_s"
             app:layout_constraintStart_toEndOf="@id/item_binance_tv_s"
             app:layout_constraintTop_toTopOf="@id/item_binance_tv_s"
@@ -54,8 +54,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="3dp"
             android:layout_marginTop="7dp"
-            android:text="balance"
-            android:textSize="14sp"
+            android:text="Balance"
+            android:textSize="12sp"
             app:layout_constraintStart_toStartOf="@id/item_binance_tv_s"
             app:layout_constraintTop_toBottomOf="@id/item_binance_tv_s" />
 
@@ -65,7 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:text="Average Price"
-            android:textSize="14sp"
+            android:textSize="12sp"
             app:layout_constraintStart_toStartOf="@id/item_binance_temp1"
             app:layout_constraintTop_toBottomOf="@id/item_binance_temp1" />
 
@@ -75,7 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:text="Purchase Amount"
-            android:textSize="14sp"
+            android:textSize="12sp"
             app:layout_constraintStart_toStartOf="@id/item_binance_temp2"
             app:layout_constraintTop_toBottomOf="@id/item_binance_temp2" />
 
@@ -85,7 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:text="Percent"
-            android:textSize="14sp"
+            android:textSize="12sp"
             app:layout_constraintStart_toStartOf="@id/item_binance_temp3"
             app:layout_constraintTop_toBottomOf="@id/item_binance_temp3" />
 
@@ -95,43 +95,43 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:text="Profit"
-            android:textSize="14sp"
+            android:textSize="12sp"
             app:layout_constraintStart_toStartOf="@id/item_binance_temp4"
             app:layout_constraintTop_toBottomOf="@id/item_binance_temp4" />
 
         <TextView
             android:id="@+id/item_binance_tv_quantity"
-            dotEight="@{coin.quantity}"
+            digit="@{coin.quantity}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="quantity"
             android:textColor="#000"
-            android:textSize="14sp"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@id/item_binance_temp1"
             app:layout_constraintStart_toStartOf="@id/item_binance_tv_amount"
             app:layout_constraintTop_toTopOf="@id/item_binance_temp1" />
 
         <TextView
             android:id="@+id/item_binance_tv_avgprice"
-            dotEight="@{coin.avgPrice}"
+            digit="@{coin.avgPrice}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="avgPrice"
             android:textColor="#000"
-            android:textSize="14sp"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@id/item_binance_temp2"
             app:layout_constraintStart_toStartOf="@id/item_binance_tv_quantity"
             app:layout_constraintTop_toTopOf="@id/item_binance_temp2" />
 
         <TextView
             android:id="@+id/item_binance_tv_amount"
-            dotEight="@{coin.purchaseAmount}"
+            digit="@{coin.purchaseAmount}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="purchase amount"
             android:text=""
             android:textColor="#000"
-            android:textSize="14sp"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@id/item_binance_temp3"
             app:layout_constraintStart_toEndOf="@id/item_binance_temp3"
             app:layout_constraintEnd_toEndOf="parent"
@@ -143,7 +143,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="percent"
-            android:textSize="14sp"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@id/item_binance_temp4"
             app:layout_constraintStart_toStartOf="@id/item_binance_tv_quantity"
             app:layout_constraintTop_toTopOf="@id/item_binance_temp4" />
@@ -154,7 +154,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="profit"
-            android:textSize="14sp"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@id/item_binance_temp5"
             app:layout_constraintStart_toStartOf="@id/item_binance_tv_quantity"
             app:layout_constraintTop_toTopOf="@id/item_binance_temp5" />
