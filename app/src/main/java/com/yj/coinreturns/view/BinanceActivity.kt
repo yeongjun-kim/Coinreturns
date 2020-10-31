@@ -7,8 +7,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.yj.coinreturns.R
 import com.yj.coinreturns.databinding.ActivityBinanceBinding
+import com.yj.coinreturns.test.test
+import com.yj.coinreturns.view.adapter.BinanceRvAdapter
 import com.yj.coinreturns.viewModel.BinanceViewModel
 import kotlinx.android.synthetic.main.activity_binance.*
 
@@ -17,6 +20,11 @@ class BinanceActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityBinanceBinding
     lateinit var binanceViewModel: BinanceViewModel
+
+
+    private val mAdapter = BinanceRvAdapter()
+    private var isRunningGethaveToCheckSymbol = true
+    private var isRunningRefrshProfit = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,91 +48,87 @@ class BinanceActivity : AppCompatActivity() {
                     waitGetHaveToCheckSymbol()
                     waitRefreshProfit()
                 } else {
-                    getHaveToCheckSymbol()
-                    refreshProfit()
+                    mDelayHandler.postDelayed(getHaveToCheckSymbol, 1500) // 첫로그인이 아니라면 1초뒤 바로 시작
+                    mDelayHandler.postDelayed(refreshProfit, 500)
                 }
 
             }
         })
 
         binanceViewModel.getAllFromRoom().observe(this, Observer { list ->
-//            list.forEachIndexed { index, coin ->
-//                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
-//            }
-//            Log.d("fhrm", " ")
+            mAdapter.setList(list)
         })
+
+
+        initRv()
 
 
         // *********** TEST *********** //
         binance_btn_test1.setOnClickListener {
-        }
-        binance_btn_test2.setOnClickListener {
-        }
-        binance_btn_test3.setOnClickListener {
-            binanceViewModel.getCurrentTime()
-            Log.d(
-                "fhrm",
-                "BinanceActivity -onCreate(),    getLastCheckTimestamp: ${binanceViewModel.getLastCheckTimestamp()}"
-            )
-        }
-        binance_btn_test4.setOnClickListener {
-            binanceViewModel.getAllFromRoom()
-        }
-        binance_btn_test5.setOnClickListener {
-            binanceViewModel.getAllFromRoom().value!!.forEachIndexed { index, coin ->
-                Log.d("fhrm", "BinanceActivity -onCreate(),    index: ${index}, coin: ${coin}")
-            }
-        }
-        binance_btn_test6.setOnClickListener {
-            binanceViewModel.getOrderHistory("XRPBTC")
-        }
-        binance_btn_test7.setOnClickListener {
-            binanceViewModel.getHaveToCheckSymbol()
-        }
-        binance_btn_test8.setOnClickListener {
-            binanceViewModel.test4()
-        }
-        binance_btn_test9.setOnClickListener {
-            binanceViewModel.test3(test.text.toString())
-        }
-        binance_btn_test10.setOnClickListener {
             binanceViewModel.test1()
         }
-        binance_btn_test11.setOnClickListener {
+        binance_btn_test2.setOnClickListener {
             binanceViewModel.test2()
         }
-
+        binance_btn_test3.setOnClickListener {
+            //            binanceViewModel.test3(test.text.toString())
+        }
+        binance_btn_test4.setOnClickListener {
+            binanceViewModel.test4()
+            mDelayHandler.removeCallbacks(getHaveToCheckSymbol)
+        }
 
     }
 
+    private fun initRv() {
+        binding.binanceRv.apply {
+            layoutManager = LinearLayoutManager(this@BinanceActivity)
+            setHasFixedSize(true)
+            adapter = mAdapter
+        }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        if (!isRunningGethaveToCheckSymbol) mDelayHandler.postDelayed(getHaveToCheckSymbol, 1000)
+        if (!isRunningRefrshProfit) waitRefreshProfit()
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mDelayHandler.removeCallbacks(getHaveToCheckSymbol)
+        mDelayHandler.removeCallbacks(refreshProfit)
+        isRunningRefrshProfit = false
+        isRunningGethaveToCheckSymbol = false
+    }
 
     private val mDelayHandler: Handler by lazy {
         Handler()
     }
 
     private fun waitGetHaveToCheckSymbol() {
-        mDelayHandler.postDelayed(::getHaveToCheckSymbol, 13000) // 15초 후에 showGuest 함수를 실행한다.
+
+        mDelayHandler.postDelayed(getHaveToCheckSymbol, 13000) // 15초 후에 showGuest 함수를 실행한다.
     }
 
     private fun waitRefreshProfit() {
-        mDelayHandler.postDelayed(::refreshProfit, 3000) // 10초 후에 showGuest 함수를 실행한다.
+        mDelayHandler.postDelayed(refreshProfit, 3000) // 10초 후에 showGuest 함수를 실행한다.
     }
 
 
-    private fun refreshProfit() {
+    private var refreshProfit = Runnable {
+        isRunningRefrshProfit = true
         binanceViewModel.refreshProfit()
         waitRefreshProfit()
     }
 
-    private fun getHaveToCheckSymbol() {
+    private var getHaveToCheckSymbol = Runnable {
+        isRunningGethaveToCheckSymbol = true
         binanceViewModel.getHaveToCheckSymbol()
         waitGetHaveToCheckSymbol()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("fhrm", "BinanceActivity -onDestroy(),    : ")
-    }
+
 }
 

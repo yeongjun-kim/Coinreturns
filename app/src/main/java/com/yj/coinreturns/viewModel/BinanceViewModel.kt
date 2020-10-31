@@ -653,6 +653,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
 
     fun refreshProfit() {
+        Log.d("fhrm", "BinanceViewModel -refreshProfit(),    : refresh")
         if (isIng) return // order history 긁는 작업중이면 return
 
         mCoinList.value?.forEach { coin ->

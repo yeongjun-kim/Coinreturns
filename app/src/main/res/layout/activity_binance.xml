@@ -9,73 +9,50 @@
             type="com.yj.coinreturns.viewModel.BinanceViewModel" />
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:backgroundTint="#DCDCDC"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/binance_rv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </androidx.recyclerview.widget.RecyclerView>
 
         <Button
             android:id="@+id/binance_btn_test1"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="test1" />
+            android:text="test1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
         <Button
             android:id="@+id/binance_btn_test2"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="test2" />
+            android:text="test2"
+            app:layout_constraintBottom_toBottomOf="@id/binance_btn_test1"
+            app:layout_constraintStart_toEndOf="@id/binance_btn_test1" />
+
         <Button
             android:id="@+id/binance_btn_test3"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="test3" />
+            android:text="test3"
+            app:layout_constraintBottom_toBottomOf="@id/binance_btn_test2"
+            app:layout_constraintStart_toEndOf="@id/binance_btn_test2" />
+
         <Button
             android:id="@+id/binance_btn_test4"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="test4" />
-        <Button
-            android:id="@+id/binance_btn_test5"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="test5" />
-        <Button
-            android:id="@+id/binance_btn_test6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="test6" />
-        <Button
-            android:id="@+id/binance_btn_test7"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="test7" />
-        <Button
-            android:id="@+id/binance_btn_test8"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="test8" />
-        <Button
-            android:id="@+id/binance_btn_test9"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="test9" />
-        <Button
-            android:id="@+id/binance_btn_test10"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="test10" />
-        <Button
-            android:id="@+id/binance_btn_test11"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="test11" />
-        <TextView
-            android:background="@drawable/result_drawable_binance"
-            android:id="@+id/test"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:text="test4"
+            app:layout_constraintBottom_toBottomOf="@id/binance_btn_test3"
+            app:layout_constraintStart_toEndOf="@id/binance_btn_test3" />
 
 
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

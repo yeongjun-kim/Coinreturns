@@ -34,10 +34,10 @@ class BinanceRvAdapter :RecyclerView.Adapter<BinanceRvAdapter.CustomViewHolder>(
     }
 
     fun setList(inputList: MutableList<Coin>) {
-//        val diffResult = DiffUtil.calculateDiff(MainRvDiffCallback(coinList, inputList))
-//        coinList = inputList
-//        diffResult.dispatchUpdatesTo(this)
-//        notifyDataSetChanged()
+        val diffResult = DiffUtil.calculateDiff(BinanceRvDiffCallback(coinList, inputList))
+        coinList = inputList
+        diffResult.dispatchUpdatesTo(this)
+        notifyDataSetChanged()
     }
 
 
