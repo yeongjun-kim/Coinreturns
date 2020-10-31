@@ -80,10 +80,12 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun loginHuobi() {
+        Toast.makeText(this,"Features will be added . .",Toast.LENGTH_SHORT).show()
         loginViewModel.checkHuobiKey()
     }
 
     fun loginCoinbase() {
+        Toast.makeText(this,"Features will be added . .",Toast.LENGTH_SHORT).show()
         loginViewModel.checkCoinbaseKey()
     }
 

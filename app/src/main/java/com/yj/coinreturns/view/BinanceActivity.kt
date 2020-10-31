@@ -12,16 +12,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mvvm.mybinance.model.Coin
 import com.yj.coinreturns.R
 import com.yj.coinreturns.databinding.ActivityBinanceBinding
 import com.yj.coinreturns.databinding.DialogBinanceEditBinding
-import com.yj.coinreturns.test.test
 import com.yj.coinreturns.view.adapter.BinanceRvAdapter
 import com.yj.coinreturns.viewModel.BinanceViewModel
-import kotlinx.android.synthetic.main.activity_binance.*
 
 class BinanceActivity : AppCompatActivity() {
 
@@ -64,7 +61,7 @@ class BinanceActivity : AppCompatActivity() {
         })
 
         binanceViewModel.getAllFromRoom().observe(this, Observer { list ->
-            list.sortWith(compareByDescending<Coin>{it.pair}.thenByDescending { it.purchaseAmount })
+            list.sortWith(compareByDescending<Coin> { it.pair }.thenByDescending { it.purchaseAmount })
             mAdapter.setList(list)
         })
 
@@ -72,27 +69,12 @@ class BinanceActivity : AppCompatActivity() {
         initRv()
         initStatusBar()
 
-        // *********** TEST *********** //
-        binance_btn_test1.setOnClickListener {
-            binanceViewModel.test1()
-        }
-        binance_btn_test2.setOnClickListener {
-            binanceViewModel.test2()
-        }
-        binance_btn_test3.setOnClickListener {
-            binanceViewModel.test3("TRX")
-        }
-        binance_btn_test4.setOnClickListener {
-            binanceViewModel.test4()
-            mDelayHandler.removeCallbacks(getHaveToCheckSymbol)
-        }
-
     }
 
     private fun initRv() {
-        mAdapter.listener = object :BinanceRvAdapter.ClickListener{
+        mAdapter.listener = object : BinanceRvAdapter.ClickListener {
             override fun onShortClick(position: Int) {
-                Log.d("fhrm", "BinanceActivity -onShortClick(),    : ${mAdapter.coinList[position]}")
+
                 openDialog(mAdapter.coinList[position])
             }
 
@@ -105,30 +87,24 @@ class BinanceActivity : AppCompatActivity() {
         }
     }
 
-    private fun openDialog(coin:Coin){
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_binance_edit,null,false)
+    private fun openDialog(coin: Coin) {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_binance_edit, null, false)
         val binding = DialogBinanceEditBinding.bind(view)
         binding.coin = coin
 
         val dialog = AlertDialog.Builder(this)
             .setTitle("EDIT")
             .setView(view)
-            .setPositiveButton("OK"){_,_->
+            .setPositiveButton("OK") { _, _ ->
                 coin.quantity = binding.dialogBinanceBalance.text.toString().toDouble()
                 coin.avgPrice = binding.dialogBinanceAvgPrice.text.toString().toDouble()
                 coin.purchaseAmount = coin.quantity * coin.avgPrice
                 binanceViewModel.insertCoinToDB(coin)
             }
-            .setNegativeButton("CANCEL",null)
+            .setNegativeButton("CANCEL", null)
             .create()
         dialog.show()
     }
-
-
-
-
-
-
 
 
     private fun initStatusBar() {
@@ -140,19 +116,6 @@ class BinanceActivity : AppCompatActivity() {
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         window.statusBarColor = Color.TRANSPARENT
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     override fun onResume() {

@@ -15,7 +15,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.time.Instant
 import java.util.*
 
 
@@ -31,7 +30,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
      */
 
     private var client = BinanceClient.create(App.prefs.apiBinance!!, App.prefs.secretBinance!!)
-
     private val mCoinRepository: CoinRepository
     private var mCoinList: LiveData<MutableList<Coin>>
     private var lastCheckTimestamp: Long = 0
@@ -59,9 +57,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     fun getHaveToCheckSymbol() {
         isIng = true
         var startTime = System.currentTimeMillis()
-        Log.d("fhrm", "BinanceViewModel -getHaveToCheckSymbol(),    last : ${lastCheckTimestamp}")
-        Log.d("fhrm", "BinanceViewModel -getHaveToCheckSymbol(),    start: ${startTime}")
-
         var allSymbol = mCoinList.value!!.map { it.symbol }.toMutableList()
 
         /**
@@ -408,10 +403,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
             setLastCheckTimestamp(orderedList[orderedList.lastIndex][1].toString().toLong())
         }
 
-        orderedList.forEachIndexed { index, mutableList ->
-            Log.d("fhrm", "apply list    index: ${index}, list: ${mutableList}")
-        }
-
 
         var insertList = mutableListOf<Coin>()
 
@@ -428,11 +419,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
         }
 
         insertList = insertList.distinct().toMutableList()
-
-        insertList.forEachIndexed { index, coin ->
-            Log.d("fhrm", "final apply list    index: ${index}, coin: ${coin}")
-        }
-
 
         orderedList.forEach { order ->
             val kind = order[0].toString()
@@ -499,160 +485,12 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     }
 
 
-    @SuppressLint("CheckResult")
-    fun test2() {
-        client.general.time()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                var changeList: MutableList<MutableList<Any>> =
-                    mutableListOf(
-                        mutableListOf(
-                            "ORDER",
-                            lastCheckTimestamp + 1000000000000,
-                            "SELL",
-                            "XRP",
-                            "AUD",
-                            50.0,
-                            0.0
-                        ),
-                        mutableListOf(
-                            "ORDER",
-                            lastCheckTimestamp + 2000000000000,
-                            "SELL",
-                            "XRP",
-                            "AUD",
-                            50.0,
-                            0.0
-                        ),
-                        mutableListOf(
-                            "DEPOSIT",
-                            lastCheckTimestamp + 3000000000000,
-                            "XRP",
-                            "USDT",
-                            50.0,
-                            0.0
-                        ),
-                        mutableListOf("WITHDRAW", lastCheckTimestamp + 4000000000000, "XRP", 50.0),
-
-                        mutableListOf(
-                            "ORDER",
-                            lastCheckTimestamp + 5000000000000,
-                            "SELL",
-                            "ENJ",
-                            "BUSD",
-                            50.0,
-                            0.0
-                        ),
-                        mutableListOf(
-                            "ORDER",
-                            lastCheckTimestamp + 6000000000000,
-                            "SELL",
-                            "ENJ",
-                            "BUSD",
-                            50.0,
-                            0.0
-                        ),
-                        mutableListOf(
-                            "DEPOSIT",
-                            lastCheckTimestamp + 7000000000000,
-                            "ENJ",
-                            "USDT",
-                            50.0,
-                            2.0
-                        ),
-                        mutableListOf("WITHDRAW", lastCheckTimestamp + 8000000000000, "ENJ", 50.0)
-                    )
-                changeMarketPriceForOriginal(changeList, lastCheckTimestamp)
-            }
-    }
-
-
-    @SuppressLint("CheckResult")
-    fun test1() {
-        client.general.time()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                Log.d(
-                    "fhrm",
-                    "BinanceViewModel -test1(),    servertime: ${it.serverTime - 600.toLong()}, System.currentTimeMillis(): ${System.currentTimeMillis()}, System.currentTimeMillis(): ${System.currentTimeMillis()}"
-                )
-            }
-    }
-
-
-    fun test3(s: String) {
-        Log.d("fhrm", "BinanceViewModel -test3(),    findPair($s): ${findPair(s)}")
-    }
-
-    fun test4() {
-        client.general.exchangeInfo()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                it.rateLimits.forEach {
-                    Log.d("fhrm", "BinanceViewModel -test4(),    : ${it}")
-                }
-            }
-    }
-
-
     fun findPair(s: String): String {
 
         if (allSymbolPair.contains(Pair(s, "USDT"))) return "USDT"
         else if (allSymbolPair.contains(Pair(s, "BTC"))) return "BTC"
         else return "BNB"
     }
-
-    @SuppressLint("CheckResult")
-    fun getOrderHistory(inputSymbol: String) {
-        client.account.allOrders(symbol = inputSymbol) // sp
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ it ->
-                it.forEachIndexed { index, order ->
-                    Log.d("fhrm", "BinanceViewModel -getOrderHistory(),    order: ${order}")
-                }
-            }, {
-                Log.d("fhrm", "BinanceViewModel -getOrderHistory(),    : error")
-            }
-                , {
-                    Log.d("fhrm", "BinanceViewModel -getOrderHistory(),    : com")
-                })
-    }
-
-
-    /**
-     * timeStamp 시간대에 해당 symbol 의 평균가격을 구해줌
-     */
-    @SuppressLint("CheckResult")
-    fun getSpecificTimeAvgPrice(symbol: String, timestamp: Long) {
-        // 특정시간 평균 가격 구하는 코드
-        client.marketData.candlesticks(
-            symbol = symbol,    //sp
-            interval = CandlestickInterval.MINUTES_1,
-            limit = 1
-//            startTime = timestamp,
-//            endTime = timestamp + 60000
-        )
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                it.forEachIndexed { index, candlestick ->
-                    Log.d(
-                        "fhrm",
-                        "BinanceViewModel -test(),    index: ${index}, candlestick.low: ${candlestick.low}, candlestick.high: ${candlestick.high}}"
-                    )
-                }
-                var avgPirce = (it[0].high + it[0].low) / 2.toBigDecimal()
-                Log.d(
-                    "fhrm",
-                    "BinanceViewModel -getSpecificTimeAvgPrice(),    avgPirce: ${avgPirce}"
-                )
-            }
-    }
-
 
     fun refreshProfit() {
         Log.d("fhrm", "BinanceViewModel -refreshProfit(),    : refresh")
@@ -767,23 +605,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
         lastCheckTimestamp = startTime
     }
 
-    @SuppressLint("CheckResult")
-    fun getCurrentTime() {
-        client.general.time()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                Log.d(
-                    "fhrm",
-                    "BinanceViewModel -getCurrentTime(),    it.serverTime: ${it.serverTime}"
-                )
-                Log.d(
-                    "fhrm",
-                    "BinanceViewModel -getCurrentTime(),    System.currentTimeMillis(): ${System.currentTimeMillis()}"
-                )
-            }
-    }
-
 
     @SuppressLint("CheckResult")
     fun getAllSymbolPair() {
@@ -802,11 +623,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
             })
     }
 
-
-    data class assetObject(
-        var symbol: String,
-        var quantity: Double
-    )
 
     class Factory(val application: Application) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {

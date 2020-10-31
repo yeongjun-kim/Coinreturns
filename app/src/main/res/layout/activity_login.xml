@@ -75,7 +75,7 @@
             android:onClick="@{() -> av.loginHuobi()}"
             app:layout_constraintEnd_toEndOf="@id/login_cl_binance"
             app:layout_constraintStart_toStartOf="@id/login_cl_binance"
-            app:layout_constraintTop_toBottomOf="@id/login_cl_binance">
+            app:layout_constraintTop_toBottomOf="@id/login_cl_coinbase">
 
             <ImageView
                 android:id="@+id/login_iv_huobi"
@@ -112,7 +112,7 @@
             android:onClick="@{() -> av.loginCoinbase()}"
             app:layout_constraintEnd_toEndOf="@id/login_cl_huobi"
             app:layout_constraintStart_toStartOf="@id/login_cl_huobi"
-            app:layout_constraintTop_toBottomOf="@id/login_cl_huobi">
+            app:layout_constraintTop_toBottomOf="@id/login_cl_binance">
 
             <ImageView
                 android:id="@+id/login_iv_coinbase"
