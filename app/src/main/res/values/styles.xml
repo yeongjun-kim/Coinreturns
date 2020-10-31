@@ -13,11 +13,6 @@
     </style>
 
 
-
-
-
-
-
     <style name="MyDialog" parent="Base.Theme.AppCompat.Light.Dialog">
         <item name="android:windowTitleStyle">@style/DialogTitle</item>
     </style>
@@ -25,5 +20,6 @@
     <style name="DialogTitle" parent="TextAppearance.AppCompat.Large">
         <item name="android:textSize">14sp</item>
     </style>
+
 
 </resources>

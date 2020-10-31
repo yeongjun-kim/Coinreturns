@@ -1,9 +1,12 @@
 package com.yj.coinreturns.view
 
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -67,7 +70,7 @@ class BinanceActivity : AppCompatActivity() {
 
 
         initRv()
-
+        initStatusBar()
 
         // *********** TEST *********** //
         binance_btn_test1.setOnClickListener {
@@ -128,7 +131,15 @@ class BinanceActivity : AppCompatActivity() {
 
 
 
-
+    private fun initStatusBar() {
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
+        window?.decorView?.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        window.statusBarColor = Color.TRANSPARENT
+    }
 
 
 

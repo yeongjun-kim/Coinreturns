@@ -22,7 +22,6 @@ import com.yj.coinreturns.viewModel.LoginViewModel
 import kotlinx.android.synthetic.main.activity_login.*
 
 
-
 class LoginActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityLoginBinding
@@ -48,48 +47,32 @@ class LoginActivity : AppCompatActivity() {
         /**
          *  Default -1, Success 1, Show PopupDialog 0
          */
-        loginViewModel.isBinanceLoginSuccess.observe(this, Observer {   isBinanceLoginSuccess->
-            if(isBinanceLoginSuccess ==1 ){
-                startActivity(Intent(this,BinanceActivity::class.java))
-            }else if(isBinanceLoginSuccess ==0){
+        loginViewModel.isBinanceLoginSuccess.observe(this, Observer { isBinanceLoginSuccess ->
+            if (isBinanceLoginSuccess == 1) {
+                startActivity(Intent(this, BinanceActivity::class.java))
+            } else if (isBinanceLoginSuccess == 0) {
                 openInputAPIkeyDialog("binance")
             }
         })
 
         loginViewModel.isHuobiLoginSuccess.observe(this, Observer { isHuobiLoginSuccess ->
-            if(isHuobiLoginSuccess == 1){
+            if (isHuobiLoginSuccess == 1) {
                 // TODO()
-            }else if (isHuobiLoginSuccess == 0){
+            } else if (isHuobiLoginSuccess == 0) {
                 openInputAPIkeyDialog("huobi")
             }
         })
 
         loginViewModel.isCoinbaseLoginSuccess.observe(this, Observer { isCoinbaseLoginSuccess ->
-            if(isCoinbaseLoginSuccess == 1){
+            if (isCoinbaseLoginSuccess == 1) {
                 // TODO()
-            }else if (isCoinbaseLoginSuccess == 0){
+            } else if (isCoinbaseLoginSuccess == 0) {
                 openInputAPIkeyDialog("coinbase")
             }
         })
 
-
-
         initStatusBar()
-
-
-
-
-
-
-        login_btn_test.setOnClickListener {
-            startActivity(Intent(this,BinanceActivity::class.java))
-
-        }
-
-
-
     }
-
 
 
     fun loginBinance() {
@@ -118,12 +101,11 @@ class LoginActivity : AppCompatActivity() {
             .setTitle("INPUT YOUR API & SECRET KEY")
             .setView(view)
             .setPositiveButton("OK") { _, _ ->
-                if(exchange == "binance"){
+                if (exchange == "binance") {
                     loginViewModel.setBinanceKey()
-                }else if(exchange == "huobi"){
+                } else if (exchange == "huobi") {
                     loginViewModel.setHuobiKey()
-                }
-                else if(exchange == "coinbase"){
+                } else if (exchange == "coinbase") {
                     loginViewModel.setCoinbaseKey()
                 }
             }
@@ -132,14 +114,10 @@ class LoginActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("fhrm", "LoginActivity -onDestroy(),    ")
-    }
-
     private fun initStatusBar() {
-        window?.decorView?.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        window.statusBarColor = Color.TRANSPARENT
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
     }
 }

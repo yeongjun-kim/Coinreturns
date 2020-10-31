@@ -74,6 +74,20 @@ object BindingAdapters {
             view.text = "-${dividePorint("$s")}"
     }
 
+    @JvmStatic
+    @BindingAdapter("deleteMessage")
+    fun setDeleteMessage(view: TextView, s: String) {
+        view.text = "* If you wnat to delete $s from the list,\n   enter 0 at the Balance or Average Price."
+    }
+
+
+
+
+
+
+
+
+
     fun dividePorint(s: String): String {
         var temp = s.split('.')
         if(temp.size<2) return "0"
