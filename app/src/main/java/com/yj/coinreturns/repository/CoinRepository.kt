@@ -30,8 +30,8 @@ class CoinRepository(application: Application, exchange: String) {
         mCoinDao.insert(coin)
     }
 
-    fun delete(symbol: String) {
-        mCoinDao.delete(symbol)
+    fun delete(coin: Coin) {
+        mCoinDao.delete(coin)
     }
 
 

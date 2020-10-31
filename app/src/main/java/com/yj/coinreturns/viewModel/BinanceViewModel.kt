@@ -400,9 +400,11 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
         if (orderedList.isNullOrEmpty()) {
             Log.d("fhrm", "BinanceViewModel -applyChangeToRoom(),    end, null: ${startTime}")
             setLastCheckTimestamp(startTime)
-        }
-        else {
-            Log.d("fhrm", "BinanceViewModel -applyChangeToRoom(),    end, not null: ${orderedList[orderedList.lastIndex][1].toString().toLong()}")
+        } else {
+            Log.d(
+                "fhrm",
+                "BinanceViewModel -applyChangeToRoom(),    end, not null: ${orderedList[orderedList.lastIndex][1].toString().toLong()}"
+            )
             setLastCheckTimestamp(orderedList[orderedList.lastIndex][1].toString().toLong())
         }
 
@@ -673,7 +675,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
                     insertCoinToDB(coin)
                 }, { e ->
-                    Log.d("fhrm", "BinanceViewModel -test(),    error: ${e.message}")
+                    Log.d("fhrm", "BinanceViewModel -refreshProfit(),    error: ${e.message}")
                 })
         }
     }
@@ -737,8 +739,14 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
 
     fun insertCoinToDB(coin: Coin) {
-        viewModelScope.launch(Dispatchers.IO) {
-            mCoinRepository.insert(coin)
+        if (coin.quantity <= 0.0 || coin.purchaseAmount <= 0.0) {
+            viewModelScope.launch(Dispatchers.IO) {
+                mCoinRepository.delete(coin)
+            }
+        } else {
+            viewModelScope.launch(Dispatchers.IO) {
+                mCoinRepository.insert(coin)
+            }
         }
     }
 

@@ -77,7 +77,7 @@ class BinanceActivity : AppCompatActivity() {
             binanceViewModel.test2()
         }
         binance_btn_test3.setOnClickListener {
-            //            binanceViewModel.test3(test.text.toString())
+            binanceViewModel.test3("TRX")
         }
         binance_btn_test4.setOnClickListener {
             binanceViewModel.test4()
@@ -111,7 +111,10 @@ class BinanceActivity : AppCompatActivity() {
             .setTitle("EDIT")
             .setView(view)
             .setPositiveButton("OK"){_,_->
-
+                coin.quantity = binding.dialogBinanceBalance.text.toString().toDouble()
+                coin.avgPrice = binding.dialogBinanceAvgPrice.text.toString().toDouble()
+                coin.purchaseAmount = coin.quantity * coin.avgPrice
+                binanceViewModel.insertCoinToDB(coin)
             }
             .setNegativeButton("CANCEL",null)
             .create()

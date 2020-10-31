@@ -17,8 +17,8 @@ interface CoinDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(coin:Coin)
 
-    @Query("DELETE FROM Coin WHERE SYMBOL LIKE :symbol")
-    fun delete(symbol: String)
+    @Delete
+    fun delete(coin: Coin)
 
     @Update
     fun update(coin:Coin)
