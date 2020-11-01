@@ -66,7 +66,7 @@ object BindingAdapters {
         if (point >= 8)
             s = bigdecimal.setScale(15 - point, RoundingMode.HALF_UP).toString()
         else
-            s = String.format("%.8f",bigdecimal.setScale(8, RoundingMode.HALF_UP))
+            s = String.format("%.8f", bigdecimal.setScale(8, RoundingMode.HALF_UP))
         if (profit >= 0.0)
             view.text = dividePorint("+$s")
         else
@@ -76,19 +76,17 @@ object BindingAdapters {
     @JvmStatic
     @BindingAdapter("deleteMessage")
     fun setDeleteMessage(view: TextView, s: String) {
-        view.text = "* If you wnat to delete $s from the list,\n   enter 0 at the Balance or Average Price."
+        view.text =
+            "* If you wnat to delete $s from the list,\n   enter 0 at the Balance or Average Price."
     }
 
     fun dividePorint(s: String): String {
         var temp = s.split('.')
-        if(temp.size<2) return "0"
+        if (temp.size < 2) return "0"
 
         if (s[0] == '+') return "+${formatter.format(BigDecimal(temp[0]))}.${temp[1]}"
-        else return "${formatter.format(BigDecimal(temp[0].replace("-","")))}.${temp[1]}"
+        else return "${formatter.format(BigDecimal(temp[0].replace("-", "")))}.${temp[1]}"
     }
-
-
-
 
 
 }
