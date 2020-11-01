@@ -12,15 +12,16 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:background="@drawable/gradient"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@drawable/gradient">
 
         <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintDimensionRatio="1:1"
-            android:src="@drawable/image_background"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
             android:scaleType="fitXY"
+            android:src="@drawable/image_login"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.25"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -29,20 +30,20 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/login_cl_binance"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="35dp"
             android:background="@drawable/rounded_corner_black"
             android:onClick="@{() -> av.loginBinance()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.65"
-            app:layout_constraintWidth_percent="0.8">
+            app:layout_constraintVertical_bias="0.70"
+            app:layout_constraintWidth_percent="0.85">
 
             <ImageView
                 android:id="@+id/login_iv_binance"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
                 android:src="@drawable/ic_binance"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -69,7 +70,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/login_cl_huobi"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="35dp"
             android:layout_marginTop="16dp"
             android:background="@drawable/rounded_corner_white"
             android:onClick="@{() -> av.loginHuobi()}"
@@ -79,8 +80,8 @@
 
             <ImageView
                 android:id="@+id/login_iv_huobi"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
                 android:src="@drawable/ic_huobi"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -92,7 +93,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:text="H U O B I   G L O B A L"
+                android:text="HUOBI  GLOBAL"
                 android:textColor="#4A7DDA"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -106,7 +107,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/login_cl_coinbase"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="35dp"
             android:layout_marginTop="16dp"
             android:background="@drawable/rounded_corner_indigo"
             android:onClick="@{() -> av.loginCoinbase()}"
@@ -116,8 +117,8 @@
 
             <ImageView
                 android:id="@+id/login_iv_coinbase"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
                 android:src="@drawable/ic_coinbase"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -129,7 +130,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:text="C O I N B A S E   P R O"
+                android:text="COINBASE  PRO"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"
                 android:textStyle="bold"

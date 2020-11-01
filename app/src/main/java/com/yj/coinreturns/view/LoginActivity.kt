@@ -1,11 +1,8 @@
 package com.yj.coinreturns.view
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -13,13 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.get
 import com.yj.coinreturns.R
 import com.yj.coinreturns.databinding.ActivityLoginBinding
 import com.yj.coinreturns.databinding.DialogLoginApiBinding
-import com.yj.coinreturns.model.App
 import com.yj.coinreturns.viewModel.LoginViewModel
-import kotlinx.android.synthetic.main.activity_login.*
 
 
 class LoginActivity : AppCompatActivity() {
@@ -74,8 +68,14 @@ class LoginActivity : AppCompatActivity() {
         initStatusBar()
     }
 
+    override fun onResume() {
+        super.onResume()
+        binding.loginClBinance.isEnabled = true
+    }
+
 
     fun loginBinance() {
+        binding.loginClBinance.isEnabled = false
         loginViewModel.checkBinanceKey()
     }
 

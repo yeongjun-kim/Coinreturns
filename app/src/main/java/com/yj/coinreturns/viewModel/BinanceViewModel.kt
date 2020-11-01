@@ -203,9 +203,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
             }, {
                 Log.d("fhrm", "BinanceViewModel -getDeposit(),    error: ${it.message}")
             }, {
-                changeList.forEachIndexed { index, list ->
-                    Log.d("fhrm", "catch -> index: ${index}, list: ${list}")
-                }
                 changeMarketPriceForOriginal(changeList, startTime)
             })
 
@@ -393,13 +390,8 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
         isIng = false
         var orderedList = changeList.sortedBy { it[1].toString() }.toMutableList()
         if (orderedList.isNullOrEmpty()) {
-            Log.d("fhrm", "BinanceViewModel -applyChangeToRoom(),    end, null: ${startTime}")
             setLastCheckTimestamp(startTime)
         } else {
-            Log.d(
-                "fhrm",
-                "BinanceViewModel -applyChangeToRoom(),    end, not null: ${orderedList[orderedList.lastIndex][1].toString().toLong()}"
-            )
             setLastCheckTimestamp(orderedList[orderedList.lastIndex][1].toString().toLong())
         }
 
@@ -493,7 +485,6 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun refreshProfit() {
-        Log.d("fhrm", "BinanceViewModel -refreshProfit(),    : refresh")
         if (isIng) return // order history 긁는 작업중이면 return
 
         mCoinList.value?.forEach { coin ->
