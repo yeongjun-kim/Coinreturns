@@ -51,7 +51,7 @@ class BinanceViewModel(application: Application) : AndroidViewModel(application)
 
 
     /**
-     * getHaveToCheckSymbol() -> gatherChangeAfterLastLogin() -> changeRightPairForBUYSELL() -> applyChangeToRoom()
+     * getHaveToCheckSymbol() -> gatherChangeAfterLastLogin() -> changeRightPairForBUYSELL() -> applyChangeToRoom() ->
      */
     @SuppressLint("CheckResult")
     fun getHaveToCheckSymbol() {
