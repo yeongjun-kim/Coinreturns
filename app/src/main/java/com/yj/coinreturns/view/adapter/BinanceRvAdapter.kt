@@ -12,9 +12,9 @@ import com.yj.coinreturns.databinding.ItemBinanceRvBinding
 import java.text.DecimalFormat
 
 
-class BinanceRvAdapter :RecyclerView.Adapter<BinanceRvAdapter.CustomViewHolder>(){
+class BinanceRvAdapter : RecyclerView.Adapter<BinanceRvAdapter.CustomViewHolder>() {
     var coinList: MutableList<Coin> = mutableListOf()
-    var listener:ClickListener? = null
+    var listener: ClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
         return CustomViewHolder(
@@ -41,18 +41,19 @@ class BinanceRvAdapter :RecyclerView.Adapter<BinanceRvAdapter.CustomViewHolder>(
     }
 
 
-    interface ClickListener{
-        fun onShortClick(position:Int)
+    interface ClickListener {
+        fun onShortClick(position: Int)
     }
 
-    class CustomViewHolder(val binding: ItemBinanceRvBinding, val listener: ClickListener?) : RecyclerView.ViewHolder(binding.root ) {
+    class CustomViewHolder(val binding: ItemBinanceRvBinding, val listener: ClickListener?) :
+        RecyclerView.ViewHolder(binding.root) {
         init {
-            itemView.setOnClickListener { listener?.onShortClick(adapterPosition)}
+            itemView.setOnClickListener { listener?.onShortClick(adapterPosition) }
 
         }
 
         fun bind(item: Coin) {
-            val color = if(item.percent>=0) "#C14040" else "#387DF0"
+            val color = if (item.percent >= 0) "#C14040" else "#387DF0"
             binding.apply {
                 itemBinanceTvP.setTextColor(Color.parseColor(color))
                 itemBinanceTvPercent.setTextColor(Color.parseColor(color))
