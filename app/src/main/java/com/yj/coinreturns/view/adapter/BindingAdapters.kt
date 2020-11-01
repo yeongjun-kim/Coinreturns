@@ -58,17 +58,16 @@ object BindingAdapters {
 
     @JvmStatic
     @BindingAdapter("profit")
-    fun setProfit(view: TextView, quantity: Double) {
-        var bigdecimal = BigDecimal(quantity)
+    fun setProfit(view: TextView, profit: Double) {
+        var bigdecimal = BigDecimal(profit)
         var point = bigdecimal.toString().indexOf('.')
         var s = ""
 
         if (point >= 8)
             s = bigdecimal.setScale(15 - point, RoundingMode.HALF_UP).toString()
         else
-            s = bigdecimal.setScale(8, RoundingMode.HALF_UP).toString()
-
-        if (s.toBigDecimal() > 0.toBigDecimal())
+            s = String.format("%.8f",bigdecimal.setScale(8, RoundingMode.HALF_UP))
+        if (profit >= 0.0)
             view.text = dividePorint("+$s")
         else
             view.text = "-${dividePorint("$s")}"
@@ -80,21 +79,16 @@ object BindingAdapters {
         view.text = "* If you wnat to delete $s from the list,\n   enter 0 at the Balance or Average Price."
     }
 
-
-
-
-
-
-
-
-
     fun dividePorint(s: String): String {
         var temp = s.split('.')
         if(temp.size<2) return "0"
 
         if (s[0] == '+') return "+${formatter.format(BigDecimal(temp[0]))}.${temp[1]}"
-        else return "${formatter.format(BigDecimal(temp[0]))}.${temp[1]}"
+        else return "${formatter.format(BigDecimal(temp[0].replace("-","")))}.${temp[1]}"
     }
+
+
+
 
 
 }

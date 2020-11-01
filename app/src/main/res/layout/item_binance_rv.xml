@@ -102,7 +102,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="("
+            android:text="( "
             android:textSize="12sp"
             app:layout_constraintEnd_toStartOf="@id/item_binance_temp6"
             app:layout_constraintTop_toTopOf="@id/item_binance_temp6" />
@@ -110,7 +110,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=")"
+            android:text=" )"
             android:textSize="12sp"
             app:layout_constraintStart_toEndOf="@id/item_binance_temp6"
             app:layout_constraintTop_toTopOf="@id/item_binance_temp6" />

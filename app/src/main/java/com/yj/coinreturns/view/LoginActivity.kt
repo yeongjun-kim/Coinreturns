@@ -94,8 +94,8 @@ class LoginActivity : AppCompatActivity() {
         Toast.makeText(this, "Wrong API / Secret Key. Please check the key.", Toast.LENGTH_LONG)
             .show()
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_login_api, null, false)
-        val binding = DialogLoginApiBinding.bind(view)
-        binding.apply {
+        val dialogBinding = DialogLoginApiBinding.bind(view)
+        dialogBinding.apply {
             av = this@LoginActivity
             lvm = loginViewModel
         }
@@ -114,6 +114,7 @@ class LoginActivity : AppCompatActivity() {
             .setNegativeButton("CANCEL", null)
             .create()
         dialog.show()
+        binding.loginClBinance.isEnabled = true
     }
 
     private fun initStatusBar() {

@@ -52,11 +52,12 @@ class BinanceRvAdapter :RecyclerView.Adapter<BinanceRvAdapter.CustomViewHolder>(
         }
 
         fun bind(item: Coin) {
-            val color = if(item.percent>0) "#C14040" else "#387DF0"
+            val color = if(item.percent>=0) "#C14040" else "#387DF0"
             binding.apply {
                 itemBinanceTvP.setTextColor(Color.parseColor(color))
                 itemBinanceTvPercent.setTextColor(Color.parseColor(color))
                 itemBinanceTvProfit.setTextColor(Color.parseColor(color))
+                itemBinanceTemp6.setTextColor(Color.parseColor(color))
                 coin = item
             }
         }
