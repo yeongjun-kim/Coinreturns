@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="\n\n 1. USDT/BTC/BNB 페어로 거래한 내역만 반영됩니다.\n
+1. Only USDT/BTC/BNB pair transactions will be reflected.\n
+\n
+2. USDT/BTC/BNB 페어가 존재하는 코인만 지원합니다.\n
+2. Only coins which have USDT/BTC/BNB pairs present are supported.\n
+\n
+3. 시장가로 거래한 경우 해당 시간대의 1분봉 평균 가격으로 평단이 책정됩니다.\n
+3. If you are ordering at market prices, Average Price will be priced at an average price of one minute for that time zone.\n
+\n
+4. 입출금에 대해선 해당 시간대의 1분봉 평균 가격으로 평단이 책정됩니다.\n
+4. On deposit, the average price of the coin is set at the average price of the time zone.\n
+\n
+5. 목록에서 지우고 싶다면 balance, purchase amount를 0으로 수정하세요.\n
+5. If you want to delete it from the list, modify the balance/purchase amount to zero.\n
+\n
+6. 수수료는 반영되지 않기 때문에 balance에 오차가 있을 수 있습니다.\n
+6. The balance may be a little different because the fee is not reflected.\n
+\n
+7. 수익률은 매 3초 갱신됩니다.\n
+7. The profit is renewed every 3 seconds.\n
+\n
+8. 거래, 입출금 반영은 매 13초 갱신됩니다.\n
+8. The Order, deposit and withdrawal reflection is updated every 13 seconds."
+        android:textSize="12sp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

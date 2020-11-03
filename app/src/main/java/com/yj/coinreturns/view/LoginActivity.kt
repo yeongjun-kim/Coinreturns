@@ -1,7 +1,9 @@
 package com.yj.coinreturns.view
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.Toast
@@ -14,6 +16,7 @@ import com.yj.coinreturns.R
 import com.yj.coinreturns.databinding.ActivityLoginBinding
 import com.yj.coinreturns.databinding.DialogLoginApiBinding
 import com.yj.coinreturns.viewModel.LoginViewModel
+import kotlinx.android.synthetic.main.dialog_login_api.*
 
 
 class LoginActivity : AppCompatActivity() {
@@ -65,6 +68,8 @@ class LoginActivity : AppCompatActivity() {
             }
         })
 
+
+
         initStatusBar()
     }
 
@@ -99,8 +104,12 @@ class LoginActivity : AppCompatActivity() {
             av = this@LoginActivity
             lvm = loginViewModel
         }
+
+
+
+
+
         val dialog = AlertDialog.Builder(this)
-            .setTitle("INPUT YOUR API & SECRET KEY")
             .setView(view)
             .setPositiveButton("OK") { _, _ ->
                 if (exchange == "binance") {
@@ -113,8 +122,14 @@ class LoginActivity : AppCompatActivity() {
             }
             .setNegativeButton("CANCEL", null)
             .create()
+
         dialog.show()
         binding.loginClBinance.isEnabled = true
+    }
+
+    fun startLink(){
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://eong-geong.tistory.com/3"))
+        startActivity(intent)
     }
 
     private fun initStatusBar() {

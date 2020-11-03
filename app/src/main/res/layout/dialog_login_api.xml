@@ -18,18 +18,42 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/dialog_login_tv_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Input your Api/Secret Key"
+            android:textColor="#000"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.85" />
+
+        <TextView
+            android:id="@+id/dialog_login_temp1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:text="How to get an api key?"
+            android:onClick="@{() -> av.startLink()}"
+            android:textColor="@android:color/holo_blue_dark"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="@id/dialog_login_tv_title"
+            app:layout_constraintTop_toBottomOf="@id/dialog_login_tv_title" />
+
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/dialog_til_api"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="14dp"
             app:layout_constraintBottom_toTopOf="@id/dialog_til_secret"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dialog_login_temp1"
             app:layout_constraintWidth_percent="0.8">
 
             <EditText
@@ -51,7 +75,6 @@
             android:id="@+id/dialog_til_secret"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/dialog_til_api"
             app:layout_constraintTop_toBottomOf="@id/dialog_til_api"
@@ -70,19 +93,6 @@
 
 
         </com.google.android.material.textfield.TextInputLayout>
-
-
-        <!--<EditText-->
-        <!--android:id="@+id/dialog_et_secret"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:hint="SECRET_KEY"-->
-        <!--android:text="@={av.secret}}"-->
-        <!--android:textSize="14sp"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toBottomOf="@id/dialog_et_api"-->
-        <!--app:layout_constraintWidth_percent="0.7" />-->
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -24,7 +24,8 @@ object BindingAdapters {
         if (point >= 8)
             s = bigdecimal.setScale(15 - point, RoundingMode.HALF_UP).toString()
         else
-            s = bigdecimal.setScale(8, RoundingMode.HALF_UP).toString()
+            s = String.format("%.8f", bigdecimal.setScale(8, RoundingMode.HALF_UP))
+
         view.text = dividePorint(s)
     }
 
@@ -41,7 +42,7 @@ object BindingAdapters {
         if (point >= 8)
             s = bigdecimal.setScale(15 - point, RoundingMode.HALF_UP).toString()
         else
-            s = bigdecimal.setScale(8, RoundingMode.HALF_UP).toString()
+            s = String.format("%.8f", bigdecimal.setScale(8, RoundingMode.HALF_UP))
         view.setText(s)
         view.setSelection(s.length)
     }

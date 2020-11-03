@@ -52,6 +52,7 @@ class BinanceActivity : AppCompatActivity() {
                     binanceViewModel.initFirstAsset()
                     waitGetHaveToCheckSymbol()
                     waitRefreshProfit()
+                    showNotice()
                 } else {
                     mDelayHandler.postDelayed(getHaveToCheckSymbol, 1500) // 첫로그인이 아니라면 1초뒤 바로 시작
                     mDelayHandler.postDelayed(refreshProfit, 500)
@@ -69,6 +70,16 @@ class BinanceActivity : AppCompatActivity() {
         initRv()
         initStatusBar()
 
+    }
+
+    private fun showNotice() {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_binance_notice, null, false)
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Notice.")
+            .setView(view)
+            .setPositiveButton("OK"){_,_->}
+            .create()
+        dialog.show()
     }
 
     private fun initRv() {
